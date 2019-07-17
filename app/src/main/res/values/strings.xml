@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">PIO</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">MUET BUS</string>
+
+    <string name="error_api_key" translatable="false">No API key defined in gradle.properties</string>
+
 </resources>

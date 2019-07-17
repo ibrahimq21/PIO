@@ -1,18 +1,18 @@
 package com.example.pio;
 
-import android.app.Dialog;
 import android.content.Intent;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.libraries.places.compat.Places;
+
+
+//import com.google.android.libraries.places.api.Places;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,41 +26,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(isServicesOK()){
-            init();
+
+        String apikey = getString(R.string.google_maps_key);
+
+        if(apikey.isEmpty()){
+            Toast.makeText(this, getString(R.string.error_api_key), Toast.LENGTH_LONG).show();
         }
+
+    /*    if(!Places.isInitialized()){
+            Places.initialize(getApplicationContext(), apikey);
+        }*/
+
+        init();
+
     }
 
     private void init(){
-        Button btnMap = (Button) findViewById(R.id.btnMap);
-        btnMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-            }
-        });
+        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+        startActivity(intent);
     }
 
-    public boolean isServicesOK(){
-        Log.d(TAG, "isServicesOK: checking google services version");
 
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
-
-        if(available == ConnectionResult.SUCCESS){
-            //everything is fine and the user can make map requests
-            Log.d(TAG, "isServicesOK: Google Play Services is working");
-            return true;
-        }
-        else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
-            //an error occured but we can resolve it
-            Log.d(TAG, "isServicesOK: an error occured but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
-            dialog.show();
-        }else{
-            Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
-        }
-        return false;
-    }
 
 }

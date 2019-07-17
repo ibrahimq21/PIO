@@ -38,22 +38,22 @@
             android:textColor="#000"
             android:id="@+id/input_search"
             android:background="@null"
-            android:hint="Enter Address, City or Zip Code"
+            android:hint="Enter Address, Or Bus Number"
             android:imeOptions="actionSearch"/>
 
 
     </RelativeLayout>
 
     <ImageView
+        android:id="@+id/ic_gps"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_below="@id/relLayout1"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="478dp"
+        android:layout_marginRight="2dp"
         android:scaleType="centerCrop"
-        android:id="@+id/ic_gps"
-        android:src="@drawable/ic_gps"/>
+        android:src="@drawable/ic_gps" />
 
 
 </RelativeLayout>
