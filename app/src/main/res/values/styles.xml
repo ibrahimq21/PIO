@@ -8,17 +8,26 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- &lt;!&ndash; Base application theme. &ndash;&gt;
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        &lt;!&ndash; Customize your theme here. &ndash;&gt;
-        <item name="colorPrimary">@color/colorPrimary</item>
+    <style name="AppTheme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@android:color/transparent</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>-->
+        <item name="titleTextColor">@android:color/black</item>
+    </style>
+
+
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Transparent.ActionBar"
+        parent="Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:background">@null</item>
+        <!-- Support library compatibility -->
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="background">@null</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

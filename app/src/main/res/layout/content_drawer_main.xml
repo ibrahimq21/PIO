@@ -8,4 +8,19 @@
     tools:context=".DrawerMain"
     tools:showIn="@layout/app_bar_drawer_main">
 
+
+
+
+        <include layout="@layout/activity_maps" />
+
+
+
+
+
+
+
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
