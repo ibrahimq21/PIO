@@ -1,7 +1,7 @@
 package com.example.pio;
 
 import android.Manifest;
-import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -30,7 +30,11 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataApi;
@@ -44,12 +48,21 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.compat.GeoDataClient;
+import com.google.android.libraries.places.compat.Place;
+import com.google.android.libraries.places.compat.PlaceDetectionClient;
+import com.google.android.libraries.places.compat.Places;
+import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
+import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
+import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static com.google.android.gms.location.places.Places.GEO_DATA_API;
 import static com.google.android.gms.location.places.Places.PLACE_DETECTION_API;
 
@@ -59,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
 
     private static final int ERROR_DIALOG_REQUEST = 9001;
+    final int AUTOCOMPLETE_REQUEST = 2;
 
 
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -67,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final float DEFAULT_ZOOM = 15f;
     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168), new LatLng(71, 136));
-
 
 
     //widgets
@@ -83,19 +96,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleApiClient mGoogleApiClient;
     private GeoDataApi getGeoDataApi;
     private PlaceDetectionApi getPlaceDetectionApi;
+    private PlaceDetectionClient getPlaceDetectionClient;
+    GeoDataClient geoDataClient;
+    PlaceDetectionClient placeDetectionClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (android.os.Build.VERSION.SDK_INT > 22)
-        {
+        if (android.os.Build.VERSION.SDK_INT > 22) {
             StrictMode.ThreadPolicy policy = new
                     StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        geoDataClient = Places.getGeoDataClient(this, null);
+        placeDetectionClient = Places.getPlaceDetectionClient(this, null);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -106,10 +124,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
-        mGps = (ImageView) findViewById(R.id.ic_gps);
 
-        getLocationPermission();
+        mSearchText = findViewById(R.id.input_search);
+
+
+
+        mSearchText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "showAutocomplete: clicked Magnify icon");
+                showAutocomplete();
+            }
+        });
+
+
+        mGps = findViewById(R.id.ic_gps);
+
 
         mGps.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,12 +149,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+
+        getPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+
+        getLocationPermission();
+
+
         hideSoftKeyboard();
 
-        //init();
 
     }
 
+    private void showAutocomplete() {
+
+        Log.d(TAG, "showAutocomplete: clicked AutoCompleteSearch Bar");
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .build(this);
+            startActivityForResult(intent, AUTOCOMPLETE_REQUEST);
+//            geoLocate();
+        } catch (GooglePlayServicesRepairableException e) {
+            GooglePlayServicesUtil.getErrorDialog(e.getConnectionStatusCode(), this, 0);
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Log.d(TAG, "GooglePlayServicesNotAvailableException: Error");
+        }
+    }
+
+    /*  */
+
+    /**
+     * Sets up the autocomplete fragment to show place details when a place is selected.
+     *//*
+    private void setupAutoCompleteFragment() {
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.map);
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+//                showPlace(getString(R.string.autocomplete_fragment), place);
+                Log.d(TAG, "setupAutoCompleteFragment: AutoComplete is Working.");
+            }
+
+            @Override
+            public void onError(Status status) {
+
+                Log.d(TAG, "setupAutoCompleteFragment: Error");
+            }
+        });
+    }*/
     private void initMap() {
         Log.d(TAG, "initMap: initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -164,50 +238,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void init() {
-        Log.d(TAG, "init: initializing");
-
-        // Retrieve a PlacesClient (previously initialized - see MainActivity)
-//        placesClient = Places.createClient(this);
-/*
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(GEO_DATA_API)
-                .addApi(PLACE_DETECTION_API)
-                .enableAutoManage(this,0, this)
-                .build();*/
-
-        mPlaceAutocompleteAdapter = new PlacesAutoCompleteAdaptor(this, mGoogleApiClient,
-                LAT_LNG_BOUNDS, null);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
-        mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH
-                        || actionId == EditorInfo.IME_ACTION_DONE
-                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
-
-                    //execute our method for searching
-                    geoLocate();
-                }
-
-                return false;
-            }
-        });
-
-        mGps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: clicked gps icon");
-                getDeviceLocation();
-            }
-        });
-
-        hideSoftKeyboard();
-    }
 
     @Override
     public void onBackPressed() {
@@ -250,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
         }
     }
+
 
     private void moveCamera(LatLng latLng, float defaultZoom, String my_location) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
@@ -360,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
-            init();
+
         }
 
     }
