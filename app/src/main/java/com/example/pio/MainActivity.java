@@ -9,12 +9,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,18 +51,11 @@ import com.google.android.libraries.places.compat.Place;
 import com.google.android.libraries.places.compat.PlaceDetectionClient;
 import com.google.android.libraries.places.compat.Places;
 import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
-import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
-import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
-
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static com.google.android.gms.location.places.Places.GEO_DATA_API;
-import static com.google.android.gms.location.places.Places.PLACE_DETECTION_API;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
@@ -79,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
-            new LatLng(-40, -168), new LatLng(71, 136));
+    /*private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
+            new LatLng(-40, -168), new LatLng(71, 136));*/
 
 
     //widgets
@@ -90,12 +81,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
-    //    private PlacesClient placesClient;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private PlacesAutoCompleteAdaptor mPlaceAutocompleteAdapter;
-    private GoogleApiClient mGoogleApiClient;
-    private GeoDataApi getGeoDataApi;
-    private PlaceDetectionApi getPlaceDetectionApi;
+    private GoogleApiClient mGoogleApiClient = null;
     private PlaceDetectionClient getPlaceDetectionClient;
     GeoDataClient geoDataClient;
     PlaceDetectionClient placeDetectionClient;
@@ -164,9 +151,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Log.d(TAG, "showAutocomplete: clicked AutoCompleteSearch Bar");
         try {
+
+           /*============================need more modification in this code=======================*/
+
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                             .build(this);
+
+
+            /*============================need more modification in this code=======================*/
+
+
+
             startActivityForResult(intent, AUTOCOMPLETE_REQUEST);
 //            geoLocate();
         } catch (GooglePlayServicesRepairableException e) {
