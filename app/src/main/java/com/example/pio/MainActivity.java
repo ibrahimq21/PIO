@@ -1,6 +1,7 @@
 package com.example.pio;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -66,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     final int AUTOCOMPLETE_REQUEST = 2;
 
 
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
+    private static final String COURSE_LOCATION = permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 15f;
     /*private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        mSearchText = findViewById(R.id.input_search);
+       /* mSearchText = findViewById(R.id.input_search);
 
 
 
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.d(TAG, "showAutocomplete: clicked Magnify icon");
                 showAutocomplete();
             }
-        });
+        });*/
 
 
         mGps = findViewById(R.id.ic_gps);
@@ -204,8 +205,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: getting location permissions");
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION};
+        String[] permissions = {permission.ACCESS_FINE_LOCATION,
+                permission.ACCESS_COARSE_LOCATION};
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -379,9 +380,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (mLocationPermissionsGranted) {
             getDeviceLocation();
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             mMap.setMyLocationEnabled(true);
