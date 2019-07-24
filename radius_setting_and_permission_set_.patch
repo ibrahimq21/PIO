@@ -1,0 +1,194 @@
+Index: app/src/main/java/com/example/pio/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/pio/MainActivity.java	(revision 92fd930bf73dc42dda54eaaa38f0cfe7097fc4df)
++++ app/src/main/java/com/example/pio/MainActivity.java	(date 1563923348263)
+@@ -78,7 +78,7 @@
+     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+-    private static final float DEFAULT_ZOOM = 15f;
++    private static final float DEFAULT_ZOOM = 20f;
+     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
+             new LatLng(-40, -168), new LatLng(71, 136));
+ 
+@@ -100,6 +100,8 @@
+     GeoDataClient geoDataClient;
+     PlaceDetectionClient placeDetectionClient;
+ 
++
++
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision 92fd930bf73dc42dda54eaaa38f0cfe7097fc4df)
++++ app/src/main/AndroidManifest.xml	(date 1563923348316)
+@@ -6,10 +6,15 @@
+          Google Maps Android API v2, but you must specify either coarse or fine
+          location permissions for the 'MyLocation' functionality.
+     -->
+-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
++
++    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
++    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+     <uses-permission android:name="android.permission.INTERNET"/>
++<<<<<<< Updated upstream
+     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
++=======
++>>>>>>> Stashed changes
+ 
+ 
+     <application
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision 92fd930bf73dc42dda54eaaa38f0cfe7097fc4df)
++++ app/build.gradle	(date 1563923348261)
+@@ -5,7 +5,7 @@
+     buildToolsVersion "29.0.1"
+     defaultConfig {
+         applicationId "com.example.pio"
+-        minSdkVersion 25
++        minSdkVersion 22
+         targetSdkVersion 29
+         versionCode 1
+         versionName "1.0"
+Index: app/src/main/res/layout/activity_maps.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_maps.xml	(revision 92fd930bf73dc42dda54eaaa38f0cfe7097fc4df)
++++ app/src/main/res/layout/activity_maps.xml	(date 1563923348264)
+@@ -11,13 +11,12 @@
+     tools:showIn="@layout/app_bar_drawer_main">
+ 
+ 
+-
+-<RelativeLayout
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent">
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent">
+ 
+ 
+-   <!-- <fragment
++        <!-- <fragment
+         xmlns:tools="http://schemas.android.com/tools"
+         android:id="@+id/map"
+         android:name="com.google.android.gms.maps.SupportMapFragment"
+@@ -26,59 +25,57 @@
+         tools:context=".MapsActivity" />-->
+ 
+ 
+-    <fragment
+-        android:id="@+id/map"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:name="com.google.android.gms.maps.SupportMapFragment"
+-        tools:context=".MainActivity"/>
++        <fragment
++            android:id="@+id/map"
++            android:name="com.google.android.gms.maps.SupportMapFragment"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            tools:context=".MainActivity" />
+ 
+ 
+-
+-
+-    <RelativeLayout
+-        android:id="@+id/relLayout1"
+-        android:layout_width="match_parent"
+-        android:layout_height="50dp"
+-        android:layout_marginLeft="10dp"
+-        android:layout_marginTop="10dp"
+-        android:layout_marginRight="10dp"
+-        android:background="@drawable/white_border"
+-        android:elevation="10dp">
++        <RelativeLayout
++            android:id="@+id/relLayout1"
++            android:layout_width="match_parent"
++            android:layout_height="50dp"
++            android:layout_marginLeft="10dp"
++            android:layout_marginTop="10dp"
++            android:layout_marginRight="10dp"
++            android:background="@drawable/white_border"
++            android:elevation="10dp">
+ 
+-        <ImageView
+-            android:id="@+id/ic_magnify"
+-            android:layout_width="15dp"
+-            android:layout_height="15dp"
+-            android:layout_centerVertical="true"
+-            android:layout_marginLeft="10dp"
+-            android:src="@drawable/ic_magnify" />
++            <ImageView
++                android:id="@+id/ic_magnify"
++                android:layout_width="15dp"
++                android:layout_height="15dp"
++                android:layout_centerVertical="true"
++                android:layout_marginLeft="10dp"
++                android:src="@drawable/ic_magnify" />
+ 
+-        <AutoCompleteTextView
+-            android:id="@+id/input_search"
+-            android:layout_width="match_parent"
+-            android:layout_height="match_parent"
+-            android:layout_centerVertical="true"
+-            android:layout_toRightOf="@+id/ic_magnify"
+-            android:background="@null"
+-            android:hint="Enter Address, Or Bus Number"
+-            android:imeOptions="actionSearch"
+-            android:textColor="#000"
+-            android:textSize="15sp" />
++            <AutoCompleteTextView
++                android:id="@+id/input_search"
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:layout_centerVertical="true"
++                android:layout_toRightOf="@+id/ic_magnify"
++                android:background="@null"
++                android:hint="Enter Address, Or Bus Number"
++                android:imeOptions="actionSearch"
++                android:textColor="#000"
++                android:textSize="15sp" />z
+ 
+ 
+-    </RelativeLayout>
++        </RelativeLayout>
+ 
+-    <ImageView
+-        android:id="@+id/ic_gps"
+-        android:layout_width="40dp"
+-        android:layout_height="40dp"
+-        android:layout_below="@id/relLayout1"
+-        android:layout_alignParentRight="true"
+-        android:layout_marginTop="478dp"
+-        android:layout_marginRight="2dp"
+-        android:scaleType="centerCrop"
+-        android:src="@drawable/ic_gps" />
++        <ImageView
++            android:id="@+id/ic_gps"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_below="@id/relLayout1"
++            android:layout_alignParentRight="true"
++            android:layout_marginTop="403dp"
++            android:layout_marginRight="17dp"
++            android:scaleType="centerCrop"
++            android:src="@drawable/ic_gps" />
+ 
+     </RelativeLayout>
+ 
