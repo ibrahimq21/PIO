@@ -4,17 +4,25 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,6 +54,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -61,12 +70,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, SensorEventListener {
 
     private static final String TAG = "MainActivity";
 
     private static final int ERROR_DIALOG_REQUEST = 9001;
     final int AUTOCOMPLETE_REQUEST = 2;
+
+
+    Float azimut=0.0f;
+    //CustomDrawableView mCustomDrawableView;
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    Sensor accelerometer;
+    Sensor magnetometer;
+    ImageView mNavigator;
 
 
 
@@ -91,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     GeoDataClient geoDataClient;
     PlaceDetectionClient placeDetectionClient;
 
+    private Boolean isMarkerRotating;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        isMarkerRotating = false;
+
+
 
         geoDataClient = Places.getGeoDataClient(this, null);
         placeDetectionClient = Places.getPlaceDetectionClient(this, null);
@@ -141,6 +165,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+
+
+
         mGps = findViewById(R.id.ic_gps);
 
 
@@ -162,6 +189,66 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     }
+
+
+    private double beringBetweenLocation(LatLng latlng1, LatLng latlng2){
+
+        double PI = 3.14159;
+        double lat1 = latlng1.latitude * PI / 180;
+        double lng1 = latlng1.longitude * PI / 180;
+        double lat2 = latlng2.latitude * PI / 180;
+        double lng2 = latlng2.longitude * PI / 180;
+
+        double dLon = (lng2 - lng1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return brng;
+    }
+
+    private void rotateMarker(final Marker marker, final float toRotation) {
+        if(!isMarkerRotating) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float startRotation = marker.getRotation();
+            final long duration = 2000;
+
+            final Interpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    isMarkerRotating = true;
+
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                    float rot = t * toRotation + (1 - t) * startRotation;
+
+                    float bearing =  -rot > 180 ? rot / 2 : rot;
+
+                    marker.setRotation(bearing);
+
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        isMarkerRotating = false;
+                    }
+                }
+            });
+        }
+    }
+
+
+
 
     private void showAutocomplete() {
 
@@ -248,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mGoogleApiClient.stopAutoManage(this);
             mGoogleApiClient.disconnect();
         }
+        mSensorManager.unregisterListener(this);
     }
 
 
@@ -259,6 +347,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             super.onBackPressed();
         }
+    }
+
+
+    private void getDriverLocation(){
+        Log.d(TAG, "getDriverLocation: getting the drivers devices current location");
+
+        /*This method will get the location of driver by getting the latitute
+         and longitude from the database and then put this in moveCamera method*/
+
     }
 
     private void getDeviceLocation() {
@@ -406,7 +503,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
 
+        /*use this code for current direction of bus driver*/
+
+
+        /*LatLng oldLocation, newLocaation;
+
+        float bearing = (float) beringBetweenLocation(oldLocation, newLocaation);
+        rotateMarker(start_marker, bearing);*/
+
+
+        /*use this code for current direction of bus driver*/
+
     }
 
+    float[] mGravity;
+    float[] mGeomagnetic;
 
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+
+
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                mGravity = sensorEvent.values;
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                mGeomagnetic = sensorEvent.values;
+            if (mGravity != null && mGeomagnetic != null) {
+                float R[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(R, orientation);
+                    azimut = orientation[0];
+                }
+            }
+            //mCustomDrawableView.invalidate();
+            rotateImage(azimut);
+    }
+
+    private void rotateImage(Float azimut) {
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
 }

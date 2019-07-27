@@ -40,11 +40,16 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
             }
 
+            stmt.close();
+            con.close();
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+
     }
 
 
