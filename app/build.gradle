@@ -38,6 +38,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'androidx.navigation:navigation-ui:2.0.0'
+    implementation project(path: ':ptsdblibrary')
 
 
 }

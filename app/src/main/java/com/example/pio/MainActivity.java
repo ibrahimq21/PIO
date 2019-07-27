@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -28,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.example.ptsdblibrary.DBConnector;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final int ERROR_DIALOG_REQUEST = 9001;
     final int AUTOCOMPLETE_REQUEST = 2;
+
 
 
     private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
@@ -113,6 +116,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+        /*Database Connection Test*/
+
+
+
+        new DBConnector().execute();
+
+
+
+        /*Database Connection Test*/
+
+
        /* mSearchText = findViewById(R.id.input_search);
 
 
@@ -124,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 showAutocomplete();
             }
         });*/
+
 
 
         mGps = findViewById(R.id.ic_gps);
@@ -138,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-        getPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+//        getPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
         getLocationPermission();
 
@@ -392,4 +407,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
     }
+
+
 }
