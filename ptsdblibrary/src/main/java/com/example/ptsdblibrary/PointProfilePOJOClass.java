@@ -19,6 +19,29 @@ public class PointProfilePOJOClass {
     boolean tour_mode, reverse_mode;
 
 
+    public PointProfilePOJOClass() {
+    }
+
+    public PointProfilePOJOClass(int point_id, int driver_id, int device_id, int vehicle_id, String area, String route, double current_log, double current_lat, String timestamp_online, boolean tour_mode, boolean reverse_mode) {
+        this.point_id = point_id;
+        this.driver_id = driver_id;
+        this.device_id = device_id;
+        this.vehicle_id = vehicle_id;
+        this.area = area;
+        this.route = route;
+        this.current_log = current_log;
+        this.current_lat = current_lat;
+        this.timestamp_online = timestamp_online;
+        this.tour_mode = tour_mode;
+        this.reverse_mode = reverse_mode;
+    }
+
+    public PointProfilePOJOClass(double current_log, double current_lat) {
+        this.current_log = current_log;
+        this.current_lat = current_lat;
+    }
+
+
 
     public int getPoint_id() {
         return point_id;

@@ -1,17 +1,14 @@
 package com.example.pio;
 
-import android.Manifest;
 import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -25,7 +22,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,28 +34,25 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.ptsdblibrary.DBConnector;
+import com.example.ptsdblibrary.PointProfilePOJOClass;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataApi;
-import com.google.android.gms.location.places.PlaceDetectionApi;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
+
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.compat.GeoDataClient;
-import com.google.android.libraries.places.compat.Place;
 import com.google.android.libraries.places.compat.PlaceDetectionClient;
 import com.google.android.libraries.places.compat.Places;
 import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
@@ -70,7 +63,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, SensorEventListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = "MainActivity";
 
@@ -88,10 +81,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+
     private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private static final float DEFAULT_ZOOM = 15f;
+    private static final float DEFAULT_ZOOM = 16.5f;
     /*private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168), new LatLng(71, 136));*/
 
@@ -144,11 +138,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-        new DBConnector().execute();
 
 
 
+//        initMap();
         /*Database Connection Test*/
+
+
+
+        findViewById(R.id.ic_bus).setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "clicked Bus icon");
+                new DBConnector().execute();
+            }
+        })
+
+        ;
+
+
+
 
 
        /* mSearchText = findViewById(R.id.input_search);
@@ -171,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mGps = findViewById(R.id.ic_gps);
 
 
+
         mGps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getDeviceLocation();
             }
         });
+
 
 
 //        getPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
@@ -298,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }*/
-    private void initMap() {
+   private void initMap() {
         Log.d(TAG, "initMap: initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
@@ -335,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mGoogleApiClient.stopAutoManage(this);
             mGoogleApiClient.disconnect();
         }
-        mSensorManager.unregisterListener(this);
+//        mSensorManager.unregisterListener(this);
     }
 
 
@@ -519,7 +531,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     float[] mGravity;
     float[] mGeomagnetic;
 
-    @Override
+    /*@Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
 
@@ -539,13 +551,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             //mCustomDrawableView.invalidate();
             rotateImage(azimut);
-    }
+    }*/
 
     private void rotateImage(Float azimut) {
     }
 
-    @Override
+    /*@Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
-    }
+    }*/
 }
