@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //widgets
     private AutoCompleteTextView mSearchText;
     private ImageView mGps;
+    private ImageView mBuss;
 
     //vars
     private Boolean mLocationPermissionsGranted = false;
@@ -109,11 +110,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (android.os.Build.VERSION.SDK_INT > 22) {
+       /* if (android.os.Build.VERSION.SDK_INT > 22) {
             StrictMode.ThreadPolicy policy = new
                     StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-        }
+        }*/
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -144,18 +145,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        initMap();
         /*Database Connection Test*/
 
+        mBuss =  findViewById(R.id.ic_bus);
 
+        mBuss.setOnClickListener(this::getDriverLocation);
 
-        findViewById(R.id.ic_bus).setOnClickListener(new View.OnClickListener(){
+       /*findViewById(R.id.ic_bus).setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "clicked Bus icon");
                 new DBConnector().execute();
             }
-        })
-
-        ;
+        });*/
 
 
 
@@ -179,6 +180,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         mGps = findViewById(R.id.ic_gps);
+
+//        mGps.setOnClickListener(this::getDeviceLocation);
 
 
 
@@ -362,8 +365,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    private void getDriverLocation(){
+    private void getDriverLocation(View v){
         Log.d(TAG, "getDriverLocation: getting the drivers devices current location");
+
+        new DBConnector().execute();
 
         /*This method will get the location of driver by getting the latitute
          and longitude from the database and then put this in moveCamera method*/

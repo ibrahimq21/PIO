@@ -9,6 +9,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +30,12 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
     private static final String TAG = "DBConnector";
 
+
+
     private String lat;
     private String lng;
+
+    private JSONObject jo;
 
     private ResultSet rs;
 
@@ -40,7 +47,7 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
 
-        dbConfigPHP("");
+        dbConfigPHP("http://10.0.2.2/afnan/fetchPointdet.php");
         return null;
     }
 
@@ -101,10 +108,31 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
         try {
             HttpResponse res = client.execute(req);
             BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+
+            String out = in.readLine();
+
+
+
+            JSONArray ja = new JSONArray(out);
+
+            for(int i=0 ; i < ja.length(); i++){
+
+                jo = ja.getJSONObject(i);
+                lat = jo.getString("current_lat");
+                lng = jo.getString("current_lng");
+
+                Log.d(TAG, "current_lng  :"+lng+"\n"+"current_lat :"+lat);
+            }
+
+
+
+
+
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
 
 
     }
