@@ -41,17 +41,21 @@
 
 
 
-
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_maps"
-            android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".Splash" android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_maps"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
 
         <activity android:name=".DistanceActivity" android:label="@string/bus_gps" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
