@@ -34,6 +34,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.ptsdblibrary.DBConnector;
+import com.example.ptsdblibrary.PointProfileBean;
 import com.example.ptsdblibrary.PointProfilePOJOClass;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -58,7 +59,21 @@ import com.google.android.libraries.places.compat.Places;
 import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
 import com.google.android.material.navigation.NavigationView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +84,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final int ERROR_DIALOG_REQUEST = 9001;
     final int AUTOCOMPLETE_REQUEST = 2;
+    private JSONObject jo;
 
+    private double lat;
+    private double lng;
 
     Float azimut=0.0f;
     //CustomDrawableView mCustomDrawableView;
@@ -78,6 +96,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Sensor accelerometer;
     Sensor magnetometer;
     ImageView mNavigator;
+
+    private PointProfileBean pointProfileBean = new PointProfileBean();
+    private ArrayList<PointProfileBean> arrayList = new ArrayList<PointProfileBean>();
 
 
 
@@ -117,6 +138,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }*/
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
 
         isMarkerRotating = false;
 
@@ -317,7 +342,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d(TAG, "initMap: initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
-        mapFragment.getMapAsync(MainActivity.this);
+
+       mapFragment.getMapAsync(MainActivity.this);
     }
 
     private void getLocationPermission() {
@@ -366,9 +392,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void getDriverLocation(View v){
-        Log.d(TAG, "getDriverLocation: getting the drivers devices current location");
 
-        new DBConnector().execute();
+
+
+
+
+
+       String link = "http://10.0.2.2/afnan/fetchPointdet.php";
+
+        try {
+            URL url = new URL(link);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        HttpClient client = new DefaultHttpClient();
+        HttpGet req = new HttpGet();
+        try {
+            req.setURI(new URI(link));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            HttpResponse res = client.execute(req);
+            BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+
+            String out = in.readLine();
+
+            JSONArray ja = new JSONArray(out);
+
+            for(int i=0 ; i < ja.length(); i++){
+
+                jo = ja.getJSONObject(i);
+                lat = jo.getDouble("current_lat");
+                lng = jo.getDouble("current_lng");
+
+                pointProfileBean.setLng(lng);
+
+                pointProfileBean.setLat(lat);
+
+                //Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: "+ pointProfileBean.getLat()+"\n Longitude: "+pointProfileBean.getLng());
+
+
+
+
+
+       moveCamera(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng()), DEFAULT_ZOOM, "Driver Location");
 
         /*This method will get the location of driver by getting the latitute
          and longitude from the database and then put this in moveCamera method*/
@@ -413,6 +491,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
 
         if (!my_location.equals("My Location")) {
+            MarkerOptions options = new MarkerOptions()
+                    .position(latLng)
+                    .title(my_location);
+            mMap.addMarker(options);
+        }else if (!my_location.equals("Driver Location")) {
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
                     .title(my_location);

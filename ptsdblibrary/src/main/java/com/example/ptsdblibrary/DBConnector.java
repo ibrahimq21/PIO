@@ -1,9 +1,25 @@
 package com.example.ptsdblibrary;
 
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
+import android.view.WindowManager;
 
+
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -25,6 +41,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class DBConnector extends AsyncTask<String, Void, Void> {
 
@@ -32,12 +49,17 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
 
 
-    private String lat;
-    private String lng;
+    private double lat;
+    private double lng;
+    private GoogleMap mMap;
 
     private JSONObject jo;
-
+    private static final float DEFAULT_ZOOM = 16.5f;
     private ResultSet rs;
+
+    private PointProfileBean pointProfileBean = new PointProfileBean();
+
+    private ArrayList<PointProfileBean> additems;
 
 
     public DBConnector() {
@@ -46,6 +68,8 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... strings) {
+
+
 
         dbConfigPHP("http://10.0.2.2/afnan/fetchPointdet.php");
         return null;
@@ -68,11 +92,11 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
             rs = stmt.executeQuery("select current_lat from infiblve_pts.points_profiles where reverse_mode = 0");
 
             while(rs.next()){
-                lat = rs.getString("current_lat");
+                lat = rs.getDouble("current_lat");
                 Log.d(TAG, "Drivers Latitude value :"+lat);
 
             }
-            new PointProfilePOJOClass(Double.parseDouble(lat),Double.parseDouble(lng));
+
 
 
 
@@ -88,6 +112,13 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
 
     }
+
+
+
+
+
+
+
 
 
     public void dbConfigPHP(String link){
@@ -111,23 +142,25 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
 
             String out = in.readLine();
 
-
-
             JSONArray ja = new JSONArray(out);
 
             for(int i=0 ; i < ja.length(); i++){
 
                 jo = ja.getJSONObject(i);
-                lat = jo.getString("current_lat");
-                lng = jo.getString("current_lng");
+                lat = jo.getDouble("current_lat");
+                lng = jo.getDouble("current_lng");
 
-                Log.d(TAG, "current_lng  :"+lng+"\n"+"current_lat :"+lat);
+               pointProfileBean.setLng(lng);
+
+               pointProfileBean.setLat(lat);
+
+                Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
+
             }
 
+            moveCamera(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng()), DEFAULT_ZOOM, "Driver Location");
 
-
-
-
+            Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -138,32 +171,28 @@ public class DBConnector extends AsyncTask<String, Void, Void> {
     }
 
 
+    private void moveCamera(LatLng latLng, float defaultZoom, String my_location) {
+        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
 
-
-  /*  @Override
-    protected String doInBackground(String... strings) {
-
-
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/infiblve_pts","infiblve","afnan1234");
-
-            Statement stmt = con.createStatement();
-
-            if(stmt.isClosed()){
-                Log.d(TAG, "Connection is Closed.");
-            }else{
-                Log.d(TAG, "Connection is Open.");
-
-            }
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (!my_location.equals("Driver Location")) {
+            MarkerOptions options = new MarkerOptions()
+                    .position(latLng)
+                    .title(my_location);
+            mMap.addMarker(options);
         }
 
+//        hideSoftKeyboard();
+    }
 
-        return null;
+
+
+   /* private void hideSoftKeyboard() {
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }*/
+
+
+
+
+
 }
