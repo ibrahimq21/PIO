@@ -67,11 +67,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     private static final String TAG = "MainActivity";
-
 
 
     private JSONObject jo;
@@ -80,20 +78,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private double lng;
 
 
-
-
-
     private PointProfileBean pointProfileBean = new PointProfileBean();
-
-
-
 
 
     private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 16.5f;
-
 
 
     //widgets
@@ -108,8 +99,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleApiClient mGoogleApiClient = null;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-
-
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -133,18 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
-
-
-
-
-
-
-
-
-
-
-        mBuss =  findViewById(R.id.ic_bus);
+        mBuss = findViewById(R.id.ic_bus);
 
         mBuss.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,19 +130,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-
-
-
-
-
-
-
-
-
         mGps = findViewById(R.id.ic_gps);
-
-
-
 
 
         mGps.setOnClickListener(new View.OnClickListener() {
@@ -178,9 +142,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
-
-
-
         getLocationPermission();
 
 
@@ -190,18 +151,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-
-
-
-
-
-
-   private void initMap() {
+    private void initMap() {
         Log.d(TAG, "initMap: initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
 
-       mapFragment.getMapAsync(MainActivity.this);
+        mapFragment.getMapAsync(MainActivity.this);
     }
 
     private void getLocationPermission() {
@@ -249,14 +204,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    private void getDriverLocation(){
+    private void getDriverLocation() {
+
+        /*This method will get the location of driver by getting the latitute
+         and longitude from the database and then put this in moveCamera method*/
 
 
-
-
-
-
-       String link = "http://10.0.2.2/afnan/fetchPointdet.php";
+        String link = "http://10.0.2.2/afnan/fetchPointdet.php";
 
         try {
             URL url = new URL(link);
@@ -279,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             JSONArray ja = new JSONArray(out);
 
-            for(int i=0 ; i < ja.length(); i++){
+            for (int i = 0; i < ja.length(); i++) {
 
                 jo = ja.getJSONObject(i);
                 lat = jo.getDouble("current_lat");
@@ -298,21 +252,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
 
-        Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: "+ pointProfileBean.getLat()+"\n Longitude: "+pointProfileBean.getLng());
-
-
-
-
-
-//       moveCamera(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng()), DEFAULT_ZOOM, "Driver Location");
+        Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: " + pointProfileBean.getLat() + "\n Longitude: " + pointProfileBean.getLng());
 
 
         Intent intent = new Intent(this, DistanceActivity.class);
-        intent.putExtra("point_profile",pointProfileBean);
+        intent.putExtra("point_profile", pointProfileBean);
         startActivity(intent);
 
-        /*This method will get the location of driver by getting the latitute
-         and longitude from the database and then put this in moveCamera method*/
 
     }
 
@@ -358,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .position(latLng)
                     .title(my_location);
             mMap.addMarker(options);
-        }else if (!my_location.equals("Driver Location")) {
+        } else if (!my_location.equals("Driver Location")) {
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
                     .title(my_location);
@@ -371,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void hideSoftKeyboard() {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
-
 
 
     @Override
@@ -418,7 +363,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
 
     @Override
