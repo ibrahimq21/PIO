@@ -40,6 +40,8 @@
             android:value="@string/google_maps_key" />
 
 
+
+
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_maps"
@@ -50,6 +52,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".DistanceActivity" android:label="@string/bus_gps" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
