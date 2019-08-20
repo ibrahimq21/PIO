@@ -1,6 +1,5 @@
 package com.example.pio;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,8 +11,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.ptsdblibrary.PointProfileBean;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -34,9 +34,11 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
 
     @Override
     protected int getLayoutId() {
-        return R.layout.activity_main;
+        return R.layout.activity_distance;
     }
 
+
+    BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.icons8_shuttle_40);
 
     @Override
     protected void start() {
@@ -51,7 +53,11 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
 
 
         checkPost = getMap().addMarker(new MarkerOptions().position(new LatLng(CheckPostData.CHECK_POST_A_LAT, CheckPostData.CHECK_POST_A_LNG)).draggable(false).title("Check Post"));
-        busLocation = getMap().addMarker(new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).draggable(false).title("Bus Location"));
+        busLocation = getMap().addMarker(new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).draggable(false).title("Bus Location").icon(busIcon));
+
+
+
+
 
 
         String url = getUrl(checkPost.getPosition(), busLocation.getPosition(), "driving");

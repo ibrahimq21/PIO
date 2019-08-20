@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PIO</string>
+    <string name="app_name">PTS</string>
     <string name="title_activity_maps">MUET BUS</string>
 
     <string name="error_api_key" translatable="false">No API key defined in gradle.properties</string>
@@ -18,13 +18,13 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">MUET Point Tracker</string>
+    <string name="nav_header_subtitle"></string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_drawer_main">DrawerMain</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

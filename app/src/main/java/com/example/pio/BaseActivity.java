@@ -20,7 +20,7 @@ public abstract class BaseActivity extends AppCompatActivity implements OnMapRea
     private GoogleMap mMap;
 
     protected int getLayoutId() {
-        return R.layout.activity_main;
+        return R.layout.activity_distance;
     }
 
 
@@ -29,10 +29,10 @@ public abstract class BaseActivity extends AppCompatActivity implements OnMapRea
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         setUpMap();
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout1);
+        NavigationView navigationView = findViewById(R.id.nav_view1);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);

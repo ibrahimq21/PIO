@@ -3,24 +3,15 @@ package com.example.pio;
 import android.Manifest.permission;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -61,6 +52,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -99,10 +91,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GoogleApiClient mGoogleApiClient = null;
 
 
+    protected int getLayoutId() {
+        return R.layout.activity_main;
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(getLayoutId());
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
@@ -152,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     private void initMap() {
-        Log.d(TAG, "initMap: initializing map");
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
 
@@ -203,6 +200,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public static int getResponseCode(String urlString) throws MalformedURLException, IOException {
+        URL u = new URL(urlString);
+        HttpURLConnection huc = (HttpURLConnection) u.openConnection();
+        huc.setRequestMethod("GET");
+        huc.connect();
+        return huc.getResponseCode();
+    }
+
 
     private void getDriverLocation() {
 
@@ -213,9 +218,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String link = "http://10.0.2.2/afnan/fetchPointdet.php";
 
         try {
-            URL url = new URL(link);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            if (getResponseCode(link) == 404) {
+                Log.d(TAG, "URL is not Live.");
+                Toast.makeText(MainActivity.this, "Check Your Cloud Connection", Toast.LENGTH_LONG).show();
+            } else if (getResponseCode(link) == 200) {
+                try {
+                    URL url = new URL(link);
+                } catch (MalformedURLException e) {
+                    Log.d(TAG, "URL is not Live.");
+                }
+
+            }
+
+        } catch (IOException e) {
+            Log.d(TAG, "URL is Down");
         }
         HttpClient client = new DefaultHttpClient();
         HttpGet req = new HttpGet();
@@ -297,18 +313,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void moveCamera(LatLng latLng, float defaultZoom, String my_location) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
+        getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
 
         if (!my_location.equals("My Location")) {
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
                     .title(my_location);
-            mMap.addMarker(options);
+            getMap().addMarker(options);
         } else if (!my_location.equals("Driver Location")) {
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
                     .title(my_location);
-            mMap.addMarker(options);
+            getMap().addMarker(options);
         }
 
         hideSoftKeyboard();
@@ -379,55 +395,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+            getMap().setMyLocationEnabled(true);
+            getMap().getUiSettings().setMyLocationButtonEnabled(false);
 
 
         }
 
-        /*use this code for current direction of bus driver*/
 
 
-        /*LatLng oldLocation, newLocaation;
-
-        float bearing = (float) beringBetweenLocation(oldLocation, newLocaation);
-        rotateMarker(start_marker, bearing);*/
-
-
-        /*use this code for current direction of bus driver*/
 
     }
 
-    float[] mGravity;
-    float[] mGeomagnetic;
-
-    /*@Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
 
 
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-                mGravity = sensorEvent.values;
-            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-                mGeomagnetic = sensorEvent.values;
-            if (mGravity != null && mGeomagnetic != null) {
-                float R[] = new float[9];
-                float I[] = new float[9];
-                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-                if (success) {
-                    float orientation[] = new float[3];
-                    SensorManager.getOrientation(R, orientation);
-                    azimut = orientation[0];
-                }
-            }
-            //mCustomDrawableView.invalidate();
-            rotateImage(azimut);
-    }*/
-
-    private void rotateImage(Float azimut) {
+    protected GoogleMap getMap() {
+        return mMap;
     }
-
-    /*@Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }*/
 }
