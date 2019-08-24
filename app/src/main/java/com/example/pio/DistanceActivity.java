@@ -27,18 +27,18 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
     private Marker checkPost;
     private Marker busLocation;
     private Polyline mPolyline;
-    private static final float DEFAULT_ZOOM = 10f;
+    private static final float DEFAULT_ZOOM = 16.5f;
     private PointProfileBean pointProfileBean = new PointProfileBean();
 
     private static String TAG = "DistanceActivity";
 
-    @Override
+    /*@Override
     protected int getLayoutId() {
         return R.layout.activity_distance;
-    }
+    }*/
 
 
-    BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.icons8_shuttle_40);
+    BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
 
     @Override
     protected void start() {
@@ -49,10 +49,10 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
         Log.d(TAG, "start: clicked Bus icon Bus Lat and Lng" + pointProfileBean.getLat() + " and " + pointProfileBean.getLng());
 
 
-        getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(CheckPostData.CHECK_POST_A_LAT, CheckPostData.CHECK_POST_A_LNG), DEFAULT_ZOOM));
+        getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(CheckPostData.CHECK_POST_SW_LAT, CheckPostData.CHECK_POST_SW_LNG), DEFAULT_ZOOM));
 
 
-        checkPost = getMap().addMarker(new MarkerOptions().position(new LatLng(CheckPostData.CHECK_POST_A_LAT, CheckPostData.CHECK_POST_A_LNG)).draggable(false).title("Check Post"));
+        checkPost = getMap().addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).draggable(false).title("Check Post"));
         busLocation = getMap().addMarker(new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).draggable(false).title("Bus Location").icon(busIcon));
 
 

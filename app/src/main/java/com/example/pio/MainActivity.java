@@ -1,16 +1,21 @@
 package com.example.pio;
 
 import android.Manifest.permission;
-import android.content.Intent;
+import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -18,27 +23,30 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
 import com.example.ptsdblibrary.PointProfileBean;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.navigation.NavigationView;
 
 import org.apache.http.HttpResponse;
@@ -59,9 +67,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback{
 
     private static final String TAG = "MainActivity";
+
 
 
     private JSONObject jo;
@@ -72,11 +81,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
 
+    private Marker checkPostStart;
+    private Marker checkPostEnd;
+    private Marker busLocation;
+    private Marker sw_bus_point;
+
+
+    private Polyline mPolyline;
 
     private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private static final float DEFAULT_ZOOM = 16.5f;
+    private static final float DEFAULT_ZOOM = 17f;
 
 
     //widgets
@@ -87,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleApiClient mGoogleApiClient = null;
 
 
@@ -100,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
-
+        getLocationPermission();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
@@ -117,32 +132,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        mBuss = findViewById(R.id.ic_bus);
-
-        mBuss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getDriverLocation();
-            }
-        });
 
 
-        mGps = findViewById(R.id.ic_gps);
 
 
-        mGps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: clicked gps icon");
-                getDeviceLocation();
-            }
-        });
-
-
-        getLocationPermission();
-
-
-        hideSoftKeyboard();
+//        hideSoftKeyboard();
 
 
     }
@@ -150,10 +144,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initMap() {
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        Log.d(TAG, "initMap Called");
+
+       ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
 
-        mapFragment.getMapAsync(MainActivity.this);
     }
 
     private void getLocationPermission() {
@@ -186,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mGoogleApiClient.stopAutoManage(this);
             mGoogleApiClient.disconnect();
         }
-//        mSensorManager.unregisterListener(this);
+
     }
 
 
@@ -261,6 +256,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 //Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
 
+                BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1);
+
+
+
+                MarkerOptions options = new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).title("Bus Location").icon(busIcon);
+
+
+
+
+               busLocation = mMap.addMarker(options);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -271,14 +276,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: " + pointProfileBean.getLat() + "\n Longitude: " + pointProfileBean.getLng());
 
 
-        Intent intent = new Intent(this, DistanceActivity.class);
+
+        moveCamera(new LatLng(25.4050,68.2608),15f,"Default Location");
+
+
+
+
+
+
+        /*Intent intent = new Intent(this, DistanceActivity.class);
         intent.putExtra("point_profile", pointProfileBean);
-        startActivity(intent);
+        startActivity(intent);*/
 
 
     }
 
-    private void getDeviceLocation() {
+    /*private void getDeviceLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
@@ -308,24 +321,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } catch (SecurityException e) {
             Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
         }
-    }
+    }*/
 
 
-    private void moveCamera(LatLng latLng, float defaultZoom, String my_location) {
+    private void moveCamera(LatLng latLng, float defaultZoom, String location) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
-        getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
 
-        if (!my_location.equals("My Location")) {
-            MarkerOptions options = new MarkerOptions()
-                    .position(latLng)
-                    .title(my_location);
-            getMap().addMarker(options);
-        } else if (!my_location.equals("Driver Location")) {
-            MarkerOptions options = new MarkerOptions()
-                    .position(latLng)
-                    .title(my_location);
-            getMap().addMarker(options);
-        }
+
+
+
+
+
+
+
 
         hideSoftKeyboard();
     }
@@ -385,30 +394,140 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onMapReady(GoogleMap googleMap) {
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
-        mMap = googleMap;
 
-        if (mLocationPermissionsGranted) {
-            getDeviceLocation();
+        if(mMap != null){
+            return;
+        }
+        this.mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
+        getDriverLocation();
 
-            if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                    permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            getMap().setMyLocationEnabled(true);
-            getMap().getUiSettings().setMyLocationButtonEnabled(false);
 
+    }
+    private String getUrl(LatLng origin, LatLng dest, String directionMode) {
+
+
+//        origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+//        Destination of route
+
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+//        Mode
+
+        String mode = "mode=" + directionMode;
+
+        String parameter = str_origin + "&" + str_dest + "&" + mode;
+
+        String output = "json";
+
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameter + "&key=" + getString(R.string.google_maps_key);
+
+        return url;
+    }
+
+
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        Log.d(TAG,"onMarkerClick: called");
+        if(marker.equals(busLocation)){
+            //do something
+
+
+
+
+            sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point"));
+
+
+
+
+
+            checkPostStart = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).title("Check post Start"));
+
+
+            BitmapDescriptor checkPoststart_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
+
+            checkPostStart.setIcon(checkPoststart_ic);
+
+            checkPostStart.setVisible(true);
+            checkPostStart.setTag(0);
+            checkPostStart.setSnippet("Start Bus Route");
+
+
+            checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
+
+            BitmapDescriptor checkPostEnd_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons2);
+
+            checkPostEnd.setIcon(checkPostEnd_ic);
+
+            checkPostEnd.setVisible(true);
+
+            checkPostEnd.setTag(0);
+
+            checkPostEnd.setSnippet("End Bus Route");
+
+
+
+
+
+            moveCamera(checkPostEnd.getPosition(),15f,"");
+
+
+
+
+
+            if (mPolyline != null)
+                mPolyline.remove();
+            mPolyline = mMap.addPolyline(new PolylineOptions()
+            .add(   CheckPostData.CHECK_POST_FACULTY_ROAD,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_1,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_2,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_3,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_4,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_5,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_6,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_7,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_8,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_9,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_10,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_11,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_12,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_13,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_14,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_15,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_16,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_17,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_18,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_19,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_20,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_21,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_22));
+
+
+
+
+           /* String url = getUrl(checkPostStart.getPosition(), checkPostEnd.getPosition(),"driving");
+            new FetchURL(this).execute(url,"driving");*/
 
         }
+        checkPostStart.showInfoWindow();
+        checkPostEnd.showInfoWindow();
 
-
-
-
+        return false;
     }
 
 
 
-    protected GoogleMap getMap() {
-        return mMap;
+    @Override
+    public void onTaskDone(Object... values) {
+
+        if (mPolyline != null)
+            mPolyline.remove();
+        mPolyline = mMap.addPolyline((PolylineOptions) values[0]);
     }
+
 }

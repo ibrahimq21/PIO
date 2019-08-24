@@ -19,25 +19,25 @@ public abstract class BaseActivity extends AppCompatActivity implements OnMapRea
 
     private GoogleMap mMap;
 
-    protected int getLayoutId() {
+   /* protected int getLayoutId() {
         return R.layout.activity_distance;
-    }
+    }*/
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayoutId());
+//        setContentView(getLayoutId());
         setUpMap();
-        Toolbar toolbar = findViewById(R.id.toolbar1);
-        setSupportActionBar(toolbar);
-        DrawerLayout drawer = findViewById(R.id.drawer_layout1);
-        NavigationView navigationView = findViewById(R.id.nav_view1);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+//        Toolbar toolbar = findViewById(R.id.toolbar1);
+//        setSupportActionBar(toolbar);
+//        DrawerLayout drawer = findViewById(R.id.drawer_layout1);
+//        NavigationView navigationView = findViewById(R.id.nav_view1);
+//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        drawer.addDrawerListener(toggle);
+//        toggle.syncState();
+//        navigationView.setNavigationItemSelectedListener(this);
 
     }
 

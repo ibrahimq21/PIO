@@ -24,16 +24,7 @@
         android:layout_marginBottom="76dp"
         app:srcCompat="@drawable/ic_gps" />
 
-    <ImageView
-        android:id="@+id/ic_bus"
-        android:layout_width="60dp"
-        android:layout_height="93dp"
-        android:layout_above="@+id/ic_gps"
-        android:layout_alignEnd="@+id/map"
-        android:layout_marginEnd="14dp"
-        android:layout_marginBottom="133dp"
-        android:contentDescription="@string/bus_gps"
-        app:srcCompat="@drawable/muetbusx1" />
+
 
 
 </RelativeLayout>
