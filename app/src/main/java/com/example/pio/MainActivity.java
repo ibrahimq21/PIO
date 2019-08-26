@@ -1,16 +1,9 @@
 package com.example.pio;
 
 import android.Manifest.permission;
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -23,11 +16,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -67,7 +59,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
 
     private static final String TAG = "MainActivity";
 
@@ -111,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
+    @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +116,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        SearchView searchBar = findViewById(R.id.searchbar);
+
+
+
+        toolbar.setNavigationContentDescription(R.layout.search_bar);
+
         setSupportActionBar(toolbar);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -131,12 +131,83 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
 
+
+                if(query.equals("1101")){
+
+
+                    sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW));
+
+                    sw_bus_point.setTitle("SW Bus point");
+
+
+                    sw_bus_point.setSnippet("morning ETA : 3:00\nevening ETA : 9:00 ");
+
+
+
+
+                    if(!sw_bus_point.isInfoWindowShown()){
+
+                        sw_bus_point.setVisible(true);
+                    }else {
+                        sw_bus_point.showInfoWindow();
+                    }
+
+                    if (mPolyline != null)
+                        mPolyline.remove();
+                    mPolyline = mMap.addPolyline(new PolylineOptions()
+                            .add(   CheckPostData.CHECK_POST_END,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_22,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_23,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_1,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_2,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_3,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_4,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_5,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_6,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_7,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_8,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_9,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_10,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_11,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_12,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_13,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_14,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_15,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_16,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_17,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_18,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_19,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_20,
+                                    CheckPostData.CHECK_POST_FACULTY_ROAD_21,
+                                    CheckPostData.CHECK_POST_START));
+
+                }
+
+
+
+                Log.d(TAG,query);
+
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
 
 
 
 //        hideSoftKeyboard();
+
+
 
 
     }
@@ -200,8 +271,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         HttpURLConnection huc = (HttpURLConnection) u.openConnection();
         huc.setRequestMethod("GET");
         huc.connect();
+        Log.d(TAG, "Responce Code :"+huc.getResponseCode());
         return huc.getResponseCode();
     }
+
+
 
 
     private void getDriverLocation() {
@@ -213,10 +287,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String link = "http://10.0.2.2/afnan/fetchPointdet.php";
 
         try {
-            if (getResponseCode(link) == 404) {
-                Log.d(TAG, "URL is not Live.");
-                Toast.makeText(MainActivity.this, "Check Your Cloud Connection", Toast.LENGTH_LONG).show();
-            } else if (getResponseCode(link) == 200) {
+            if (getResponseCode(link) != 200) {
+
+                moveCamera(CheckPostData.CHECK_POST_SW,15f,"");
+                Toast.makeText(this, "Cannot find Bus location. Try Search route", Toast.LENGTH_SHORT).show();
+
+            }else{
+
                 try {
                     URL url = new URL(link);
                 } catch (MalformedURLException e) {
@@ -401,6 +478,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
         getDriverLocation();
+        mMap.setOnInfoWindowClickListener(this);
 
 
     }
@@ -454,8 +532,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             checkPostStart.setIcon(checkPoststart_ic);
 
             checkPostStart.setVisible(true);
-            checkPostStart.setTag(0);
-            checkPostStart.setSnippet("Start Bus Route");
+
 
 
             checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
@@ -483,7 +560,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (mPolyline != null)
                 mPolyline.remove();
             mPolyline = mMap.addPolyline(new PolylineOptions()
-            .add(   CheckPostData.CHECK_POST_FACULTY_ROAD,
+            .add(   CheckPostData.CHECK_POST_END,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_22,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD_23,
+                    CheckPostData.CHECK_POST_FACULTY_ROAD,
                     CheckPostData.CHECK_POST_FACULTY_ROAD_1,
                     CheckPostData.CHECK_POST_FACULTY_ROAD_2,
                     CheckPostData.CHECK_POST_FACULTY_ROAD_3,
@@ -505,7 +585,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     CheckPostData.CHECK_POST_FACULTY_ROAD_19,
                     CheckPostData.CHECK_POST_FACULTY_ROAD_20,
                     CheckPostData.CHECK_POST_FACULTY_ROAD_21,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_22));
+                    CheckPostData.CHECK_POST_START));
 
 
 
@@ -514,8 +594,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             new FetchURL(this).execute(url,"driving");*/
 
         }
-        checkPostStart.showInfoWindow();
-        checkPostEnd.showInfoWindow();
+
 
         return false;
     }
@@ -530,4 +609,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mPolyline = mMap.addPolyline((PolylineOptions) values[0]);
     }
 
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.d(TAG,"onInfoWindowClick: called");
+        if(marker.equals(sw_bus_point)){
+            sw_bus_point.setTitle("SW Bus Point");
+            sw_bus_point.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
+        }else if(marker.equals(checkPostStart)){
+            checkPostStart.setTitle("Check Post Start Faculty Road Route");
+            checkPostStart.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
+
+        }else if(marker.equals(checkPostEnd)){
+            checkPostEnd.setTitle("Check Post End Faculty Road Route");
+            checkPostEnd.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
+        }
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+        marker.showInfoWindow();
+
+
+    }
 }
