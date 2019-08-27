@@ -65,7 +65,28 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
 
     }
 
+    private String getDistanceURl(LatLng origin, LatLng destination){
+
+        String str_origin = "origins=" + origin.latitude + "," + origin.longitude;
+
+//        Destination of route
+
+        String str_dest = "destinations=" + destination.latitude + "," + destination.longitude;
+
+        String unit = "units=imperial";
+
+        String parameter = unit+"&"+str_origin + "&" + str_dest;
+
+
+
+        String output = "json";
+
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/"+output+"?"+parameter+"&key="+getString(R.string.google_maps_key);
+        return url;
+    }
+
     private String getUrl(LatLng origin, LatLng dest, String directionMode) {
+
 
 
 //        origin of route
@@ -80,6 +101,7 @@ public class DistanceActivity extends BaseActivity implements OnMapReadyCallback
         String mode = "mode=" + directionMode;
 
         String parameter = str_origin + "&" + str_dest + "&" + mode;
+
 
         String output = "json";
 

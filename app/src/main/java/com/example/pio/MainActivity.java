@@ -59,7 +59,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
+public class MainActivity extends AppCompatActivity implements GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
 
     private static final String TAG = "MainActivity";
 
@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private double lat;
     private double lng;
+
+    private String duration, distance;
 
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
@@ -139,52 +141,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(query.equals("1101")){
 
 
-                    sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW));
-
-                    sw_bus_point.setTitle("SW Bus point");
-
-
-                    sw_bus_point.setSnippet("morning ETA : 3:00\nevening ETA : 9:00 ");
 
 
 
 
-                    if(!sw_bus_point.isInfoWindowShown()){
-
-                        sw_bus_point.setVisible(true);
-                    }else {
-                        sw_bus_point.showInfoWindow();
-                    }
-
-                    if (mPolyline != null)
-                        mPolyline.remove();
-                    mPolyline = mMap.addPolyline(new PolylineOptions()
-                            .add(   CheckPostData.CHECK_POST_END,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_22,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_23,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_1,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_2,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_3,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_4,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_5,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_6,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_7,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_8,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_9,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_10,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_11,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_12,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_13,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_14,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_15,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_16,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_17,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_18,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_19,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_20,
-                                    CheckPostData.CHECK_POST_FACULTY_ROAD_21,
-                                    CheckPostData.CHECK_POST_START));
+                  getRouteK();
 
                 }
 
@@ -210,6 +171,73 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
+    }
+
+
+
+
+
+
+    private void getRouteK(){
+
+
+        sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point"));
+        sw_bus_point.setSnippet("Click here");
+
+        moveCamera(sw_bus_point.getPosition(),15f,"");
+
+        checkPostStart = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).title("Check post Start"));
+
+        BitmapDescriptor checkPoststart_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
+
+        checkPostStart.setIcon(checkPoststart_ic);
+
+        checkPostStart.setVisible(true);
+        checkPostStart.setSnippet("Click here");
+
+
+
+        checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
+
+        BitmapDescriptor checkPostEnd_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons2);
+
+        checkPostEnd.setIcon(checkPostEnd_ic);
+
+        checkPostEnd.setVisible(true);
+
+        checkPostEnd.setTag(0);
+
+        checkPostEnd.setSnippet("Click here");
+
+        if (mPolyline != null)
+            mPolyline.remove();
+        mPolyline = mMap.addPolyline(new PolylineOptions()
+                .add(   CheckPostData.CHECK_POST_END,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_22,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_23,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_1,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_2,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_3,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_4,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_5,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_6,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_7,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_8,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_9,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_10,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_11,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_12,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_13,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_14,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_15,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_16,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_17,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_18,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_19,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_20,
+                        CheckPostData.CHECK_POST_FACULTY_ROAD_21,
+                        CheckPostData.CHECK_POST_START));
     }
 
 
@@ -278,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-    private void getDriverLocation() {
+    private void getDriverLocation() throws MalformedURLException, JSONException, IOException{
 
         /*This method will get the location of driver by getting the latitute
          and longitude from the database and then put this in moveCamera method*/
@@ -286,25 +314,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         String link = "http://10.0.2.2/afnan/fetchPointdet.php";
 
-        try {
-            if (getResponseCode(link) != 200) {
 
-                moveCamera(CheckPostData.CHECK_POST_SW,15f,"");
-                Toast.makeText(this, "Cannot find Bus location. Try Search route", Toast.LENGTH_SHORT).show();
+        if (getResponseCode(link) != 200) {
 
-            }else{
+            moveCamera(CheckPostData.CHECK_POST_SW,15f,"");
+            Toast.makeText(this, "Cannot find Bus location. Try Search route", Toast.LENGTH_SHORT).show();
 
-                try {
-                    URL url = new URL(link);
-                } catch (MalformedURLException e) {
-                    Log.d(TAG, "URL is not Live.");
-                }
-
-            }
-
-        } catch (IOException e) {
-            Log.d(TAG, "URL is Down");
+        }else{
+            URL url = new URL(link);
         }
+
+
+
+
         HttpClient client = new DefaultHttpClient();
         HttpGet req = new HttpGet();
         try {
@@ -313,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             e.printStackTrace();
         }
 
-        try {
+
             HttpResponse res = client.execute(req);
             BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
 
@@ -344,17 +366,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                busLocation = mMap.addMarker(options);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+//            Log.d(TAG, "IOException " + e.getMessage());
+
+//            Log.d(TAG, "JSONException " + e.getMessage());
+
 
         Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: " + pointProfileBean.getLat() + "\n Longitude: " + pointProfileBean.getLng());
 
 
 
-        moveCamera(new LatLng(25.4050,68.2608),15f,"Default Location");
+        moveCamera(new LatLng(25.4050,68.2608),16.5f,"Default Location");
 
 
 
@@ -477,11 +499,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         this.mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
-        getDriverLocation();
+
+        try {
+            getDriverLocation();
+        } catch (JSONException e) {
+            Log.d(TAG, "JSONException: "+e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "IOException: "+e.getMessage());
+        }
         mMap.setOnInfoWindowClickListener(this);
 
 
     }
+
+    private String getDistanceURl(LatLng origin, LatLng destination){
+
+        String str_origin = "origins=" + origin.latitude + "," + origin.longitude;
+
+//        Destination of route
+
+        String str_dest = "destinations=" + destination.latitude + "," + destination.longitude;
+
+        String unit = "units=metric";
+
+        String parameter = unit+"&"+str_origin + "&" + str_dest;
+
+
+
+        String output = "json";
+
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/"+output+"?"+parameter+"&key="+getString(R.string.google_maps_key);
+        return url;
+    }
+
     private String getUrl(LatLng origin, LatLng dest, String directionMode) {
 
 
@@ -513,85 +563,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Log.d(TAG,"onMarkerClick: called");
         if(marker.equals(busLocation)){
-            //do something
 
 
 
-
-            sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point"));
-
-
-
-
-
-            checkPostStart = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).title("Check post Start"));
-
-
-            BitmapDescriptor checkPoststart_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
-
-            checkPostStart.setIcon(checkPoststart_ic);
-
-            checkPostStart.setVisible(true);
-
-
-
-            checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
-
-            BitmapDescriptor checkPostEnd_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons2);
-
-            checkPostEnd.setIcon(checkPostEnd_ic);
-
-            checkPostEnd.setVisible(true);
-
-            checkPostEnd.setTag(0);
-
-            checkPostEnd.setSnippet("End Bus Route");
-
-
-
-
-
-            moveCamera(checkPostEnd.getPosition(),15f,"");
-
-
-
-
-
-            if (mPolyline != null)
-                mPolyline.remove();
-            mPolyline = mMap.addPolyline(new PolylineOptions()
-            .add(   CheckPostData.CHECK_POST_END,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_22,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_23,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_1,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_2,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_3,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_4,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_5,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_6,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_7,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_8,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_9,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_10,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_11,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_12,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_13,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_14,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_15,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_16,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_17,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_18,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_19,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_20,
-                    CheckPostData.CHECK_POST_FACULTY_ROAD_21,
-                    CheckPostData.CHECK_POST_START));
+            getRouteK();
 
 
 
 
            /* String url = getUrl(checkPostStart.getPosition(), checkPostEnd.getPosition(),"driving");
             new FetchURL(this).execute(url,"driving");*/
+
+        }
+        if(marker.equals(sw_bus_point)){
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
+        }
+        if(marker.equals(checkPostStart)){
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
+
+        }
+        if(marker.equals(checkPostEnd)){
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
 
         }
 
@@ -615,18 +607,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d(TAG,"onInfoWindowClick: called");
         if(marker.equals(sw_bus_point)){
             sw_bus_point.setTitle("SW Bus Point");
-            sw_bus_point.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
-        }else if(marker.equals(checkPostStart)){
-            checkPostStart.setTitle("Check Post Start Faculty Road Route");
-            checkPostStart.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
+            mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
-        }else if(marker.equals(checkPostEnd)){
-            checkPostEnd.setTitle("Check Post End Faculty Road Route");
-            checkPostEnd.setSnippet("morning ETA : 9:00AM\nevening ETA : 3:00PM");
+            marker.showInfoWindow();
+
+
+
+
         }
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
-        marker.showInfoWindow();
+        if(marker.equals(checkPostStart)){
+            checkPostStart.setTitle("Check Post Start Faculty Road Route");
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
 
+
+            mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+
+
+            marker.showInfoWindow();
+
+        }
+        if(marker.equals(checkPostEnd)){
+            checkPostEnd.setTitle("Check Post End Faculty Road Route");
+
+            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
+            mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
+
+
+            marker.showInfoWindow();
+        }
+
+
+
+
+
+
+    }
+
+    @Override
+    public void setDouble(String min) {
+        String res[]=min.split(",");
+        duration = res[0];
+        distance = res[1];
+
+        sw_bus_point.setSnippet("duration : "+duration+"\ndistance: "+distance);
+        checkPostStart.setSnippet("duration : "+duration+"\ndistance: "+distance);
+        checkPostEnd.setSnippet("duration : "+duration+"\ndistance: "+distance);
+
+        Log.d(TAG, "duration : "+duration+"\ndistance: "+distance);
 
     }
 }
