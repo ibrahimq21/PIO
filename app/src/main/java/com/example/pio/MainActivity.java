@@ -4,6 +4,7 @@ import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -59,7 +60,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-public class MainActivity extends AppCompatActivity implements GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
+public class MainActivity extends AppCompatActivity implements PointProfilehelper, GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
 
     private static final String TAG = "MainActivity";
 
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo, Navi
     private GoogleApiClient mGoogleApiClient = null;
 
 
+
     protected int getLayoutId() {
         return R.layout.activity_main;
     }
@@ -133,19 +135,22 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo, Navi
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+
+
+
+        new PointProfileTask(this).execute();
+
+
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
 
-                if(query.equals("1101")){
+                if(query.equals(pointProfileBean.getDriverid())){
 
 
 
-
-
-
-                  getRouteK();
+                    getRouteK();
 
                 }
 
@@ -172,6 +177,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo, Navi
 
 
     }
+
+
 
 
 
@@ -655,6 +662,14 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo, Navi
         checkPostEnd.setSnippet("duration : "+duration+"\ndistance: "+distance);
 
         Log.d(TAG, "duration : "+duration+"\ndistance: "+distance);
+
+    }
+
+    @Override
+    public void setDriverId(String param) {
+
+        pointProfileBean.setDriverid(param);
+        Log.d(TAG, "setDriverId(String param) : "+param);
 
     }
 }
