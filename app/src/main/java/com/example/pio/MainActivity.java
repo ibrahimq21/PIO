@@ -10,6 +10,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -137,6 +138,19 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
 
 
+
+
+        findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               if(mPolyline.isVisible()){
+                   mPolyline.remove();
+                   sw_bus_point.remove();
+                   checkPostEnd.remove();
+                   checkPostStart.remove();
+               }
+            }
+        });
 
         new PointProfileTask(this).execute();
 
