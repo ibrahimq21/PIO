@@ -4,7 +4,6 @@ import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -12,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -61,10 +59,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 
-public class MainActivity extends AppCompatActivity implements PointProfilehelper, GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback ,GoogleMap.OnMarkerClickListener, TaskLoadedCallback,GoogleMap.OnInfoWindowClickListener{
+public class MainActivity extends AppCompatActivity implements PointProfilehelper, GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     private static final String TAG = "MainActivity";
-
 
 
     private JSONObject jo;
@@ -91,22 +88,15 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     private static final float DEFAULT_ZOOM = 17f;
 
 
-    //widgets
-
-    private ImageView mGps;
-    private ImageView mBuss;
-
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient = null;
 
 
-
     protected int getLayoutId() {
         return R.layout.activity_main;
     }
-
 
 
     @SuppressLint("ResourceType")
@@ -124,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         SearchView searchBar = findViewById(R.id.searchbar);
 
 
-
         toolbar.setNavigationContentDescription(R.layout.search_bar);
 
         setSupportActionBar(toolbar);
@@ -137,18 +126,15 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
-
-
         findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               if(mPolyline.isVisible()){
-                   mPolyline.remove();
-                   sw_bus_point.remove();
-                   checkPostEnd.remove();
-                   checkPostStart.remove();
-               }
+                if (mPolyline.isVisible()) {
+                    mPolyline.remove();
+                    sw_bus_point.remove();
+                    checkPostEnd.remove();
+                    checkPostStart.remove();
+                }
             }
         });
 
@@ -160,8 +146,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             public boolean onQueryTextSubmit(String query) {
 
 
-                if(query.equals(pointProfileBean.getDriverid())){
-
+                if (query.equals(pointProfileBean.getDriverid())) {
 
 
                     getRouteK();
@@ -169,8 +154,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
                 }
 
 
-
-                Log.d(TAG,query);
+                Log.d(TAG, query);
 
 
                 return false;
@@ -183,29 +167,19 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         });
 
 
-
-
 //        hideSoftKeyboard();
-
-
 
 
     }
 
 
-
-
-
-
-
-
-    private void getRouteK(){
+    private void getRouteK() {
 
 
         sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point"));
         sw_bus_point.setSnippet("Click here");
 
-        moveCamera(sw_bus_point.getPosition(),15f,"");
+        moveCamera(sw_bus_point.getPosition(), 15f, "");
 
         checkPostStart = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).title("Check post Start"));
 
@@ -215,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
         checkPostStart.setVisible(true);
         checkPostStart.setSnippet("Click here");
-
 
 
         checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
@@ -233,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         if (mPolyline != null)
             mPolyline.remove();
         mPolyline = mMap.addPolyline(new PolylineOptions()
-                .add(   CheckPostData.CHECK_POST_END,
+                .add(CheckPostData.CHECK_POST_END,
                         CheckPostData.CHECK_POST_FACULTY_ROAD_22,
                         CheckPostData.CHECK_POST_FACULTY_ROAD_23,
                         CheckPostData.CHECK_POST_FACULTY_ROAD,
@@ -266,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
         Log.d(TAG, "initMap Called");
 
-       ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(MainActivity.this);
 
 
     }
@@ -320,14 +293,12 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         HttpURLConnection huc = (HttpURLConnection) u.openConnection();
         huc.setRequestMethod("GET");
         huc.connect();
-        Log.d(TAG, "Responce Code :"+huc.getResponseCode());
+        Log.d(TAG, "Responce Code :" + huc.getResponseCode());
         return huc.getResponseCode();
     }
 
 
-
-
-    private void getDriverLocation() throws MalformedURLException, JSONException, IOException{
+    private void getDriverLocation() throws MalformedURLException, JSONException, IOException {
 
         /*This method will get the location of driver by getting the latitute
          and longitude from the database and then put this in moveCamera method*/
@@ -338,14 +309,12 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
         if (getResponseCode(link) != 200) {
 
-            moveCamera(CheckPostData.CHECK_POST_SW,15f,"");
+            moveCamera(CheckPostData.CHECK_POST_SW, 15f, "");
             Toast.makeText(this, "Cannot find Bus location. Try Search route", Toast.LENGTH_SHORT).show();
 
-        }else{
+        } else {
             URL url = new URL(link);
         }
-
-
 
 
         HttpClient client = new DefaultHttpClient();
@@ -357,36 +326,33 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         }
 
 
-            HttpResponse res = client.execute(req);
-            BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+        HttpResponse res = client.execute(req);
+        BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
 
-            String out = in.readLine();
+        String out = in.readLine();
 
-            JSONArray ja = new JSONArray(out);
+        JSONArray ja = new JSONArray(out);
 
-            for (int i = 0; i < ja.length(); i++) {
+        for (int i = 0; i < ja.length(); i++) {
 
-                jo = ja.getJSONObject(i);
-                lat = jo.getDouble("current_lat");
-                lng = jo.getDouble("current_lng");
+            jo = ja.getJSONObject(i);
+            lat = jo.getDouble("current_lat");
+            lng = jo.getDouble("current_lng");
 
-                pointProfileBean.setLng(lng);
+            pointProfileBean.setLng(lng);
 
-                pointProfileBean.setLat(lat);
+            pointProfileBean.setLat(lat);
 
-                //Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
+            //Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
 
-                BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1);
-
-
-
-                MarkerOptions options = new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).title("Bus Location").icon(busIcon);
+            BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1);
 
 
+            MarkerOptions options = new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).title("Bus Location").icon(busIcon);
 
 
-               busLocation = mMap.addMarker(options);
-            }
+            busLocation = mMap.addMarker(options);
+        }
 
 //            Log.d(TAG, "IOException " + e.getMessage());
 
@@ -396,8 +362,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: " + pointProfileBean.getLat() + "\n Longitude: " + pointProfileBean.getLng());
 
 
-
-        moveCamera(new LatLng(25.4050,68.2608),16.5f,"Default Location");
+        moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
 
 
 
@@ -447,13 +412,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     private void moveCamera(LatLng latLng, float defaultZoom, String location) {
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
-
-
-
-
-
-
-
 
 
         hideSoftKeyboard();
@@ -515,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
 
-        if(mMap != null){
+        if (mMap != null) {
             return;
         }
         this.mMap = googleMap;
@@ -524,16 +482,16 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         try {
             getDriverLocation();
         } catch (JSONException e) {
-            Log.d(TAG, "JSONException: "+e.getMessage());
+            Log.d(TAG, "JSONException: " + e.getMessage());
         } catch (IOException e) {
-            Log.d(TAG, "IOException: "+e.getMessage());
+            Log.d(TAG, "IOException: " + e.getMessage());
         }
         mMap.setOnInfoWindowClickListener(this);
 
 
     }
 
-    private String getDistanceURl(LatLng origin, LatLng destination){
+    private String getDistanceURl(LatLng origin, LatLng destination) {
 
         String str_origin = "origins=" + origin.latitude + "," + origin.longitude;
 
@@ -543,13 +501,12 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
         String unit = "units=metric";
 
-        String parameter = unit+"&"+str_origin + "&" + str_dest;
-
+        String parameter = unit + "&" + str_origin + "&" + str_dest;
 
 
         String output = "json";
 
-        String url = "https://maps.googleapis.com/maps/api/distancematrix/"+output+"?"+parameter+"&key="+getString(R.string.google_maps_key);
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/" + output + "?" + parameter + "&key=" + getString(R.string.google_maps_key);
         return url;
     }
 
@@ -577,14 +534,11 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     }
 
 
-
-
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        Log.d(TAG,"onMarkerClick: called");
-        if(marker.equals(busLocation)){
-
+        Log.d(TAG, "onMarkerClick: called");
+        if (marker.equals(busLocation)) {
 
 
             getRouteK();
@@ -596,14 +550,14 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             new FetchURL(this).execute(url,"driving");*/
 
         }
-        if(marker.equals(sw_bus_point)){
+        if (marker.equals(sw_bus_point)) {
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
         }
-        if(marker.equals(checkPostStart)){
+        if (marker.equals(checkPostStart)) {
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
 
         }
-        if(marker.equals(checkPostEnd)){
+        if (marker.equals(checkPostEnd)) {
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
 
         }
@@ -614,19 +568,12 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
 
 
-    @Override
-    public void onTaskDone(Object... values) {
-
-        if (mPolyline != null)
-            mPolyline.remove();
-        mPolyline = mMap.addPolyline((PolylineOptions) values[0]);
-    }
 
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Log.d(TAG,"onInfoWindowClick: called");
-        if(marker.equals(sw_bus_point)){
+        Log.d(TAG, "onInfoWindowClick: called");
+        if (marker.equals(sw_bus_point)) {
             sw_bus_point.setTitle("SW Bus Point");
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
@@ -634,10 +581,8 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             marker.showInfoWindow();
 
 
-
-
         }
-        if(marker.equals(checkPostStart)){
+        if (marker.equals(checkPostStart)) {
             checkPostStart.setTitle("Check Post Start Faculty Road Route");
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
 
@@ -648,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             marker.showInfoWindow();
 
         }
-        if(marker.equals(checkPostEnd)){
+        if (marker.equals(checkPostEnd)) {
             checkPostEnd.setTitle("Check Post End Faculty Road Route");
 
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
@@ -659,23 +604,19 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         }
 
 
-
-
-
-
     }
 
     @Override
     public void setDouble(String min) {
-        String res[]=min.split(",");
+        String res[] = min.split(",");
         duration = res[0];
         distance = res[1];
 
-        sw_bus_point.setSnippet("duration : "+duration+"\ndistance: "+distance);
-        checkPostStart.setSnippet("duration : "+duration+"\ndistance: "+distance);
-        checkPostEnd.setSnippet("duration : "+duration+"\ndistance: "+distance);
+        sw_bus_point.setSnippet("duration : " + duration + "\ndistance: " + distance);
+        checkPostStart.setSnippet("duration : " + duration + "\ndistance: " + distance);
+        checkPostEnd.setSnippet("duration : " + duration + "\ndistance: " + distance);
 
-        Log.d(TAG, "duration : "+duration+"\ndistance: "+distance);
+        Log.d(TAG, "duration : " + duration + "\ndistance: " + distance);
 
     }
 
@@ -683,7 +624,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     public void setDriverId(String param) {
 
         pointProfileBean.setDriverid(param);
-        Log.d(TAG, "setDriverId(String param) : "+param);
+        Log.d(TAG, "setDriverId(String param) : " + param);
 
     }
 }

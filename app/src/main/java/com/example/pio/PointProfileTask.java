@@ -21,7 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class PointProfileTask extends AsyncTask<String,Void, String> {
+public class PointProfileTask extends AsyncTask<String, Void, String> {
 
     private static final String TAG = "PointProfileTask";
 
@@ -46,7 +46,7 @@ public class PointProfileTask extends AsyncTask<String,Void, String> {
 
     @Override
     protected String doInBackground(String... strings) {
-        String driverid ;
+        String driverid;
         try {
             URL url = new URL("http://10.0.2.2/afnan/fetchPointdet.php");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -75,23 +75,19 @@ public class PointProfileTask extends AsyncTask<String,Void, String> {
                     return driverid;
 
 
-
-
-
-
                 }
 
 
             }
 
-        } catch(MalformedURLException e){
-            Log.d(TAG, "MalformedURLException : "+e.getMessage());
-        }catch(IOException e){
-            Log.d(TAG, "IOException : "+e.getMessage());
-        }catch(URISyntaxException e){
-            Log.d(TAG, "URISyntaxException : "+e.getMessage());
-        }catch(JSONException e){
-            Log.d(TAG, "JSONException : "+e.getMessage());
+        } catch (MalformedURLException e) {
+            Log.d(TAG, "MalformedURLException : " + e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "IOException : " + e.getMessage());
+        } catch (URISyntaxException e) {
+            Log.d(TAG, "URISyntaxException : " + e.getMessage());
+        } catch (JSONException e) {
+            Log.d(TAG, "JSONException : " + e.getMessage());
         }
         return null;
 
