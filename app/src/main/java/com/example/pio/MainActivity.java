@@ -540,24 +540,23 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         Log.d(TAG, "onMarkerClick: called");
         if (marker.equals(busLocation)) {
 
-
-            getRouteK();
-
-
-
+                getRouteK();
 
            /* String url = getUrl(checkPostStart.getPosition(), checkPostEnd.getPosition(),"driving");
             new FetchURL(this).execute(url,"driving");*/
 
         }
         if (marker.equals(sw_bus_point)) {
+            sw_bus_point.setSnippet("Click here");
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
         }
         if (marker.equals(checkPostStart)) {
+            checkPostStart.setSnippet("Click here");
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
 
         }
         if (marker.equals(checkPostEnd)) {
+            checkPostEnd.setSnippet("Click here");
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
 
         }
@@ -578,7 +577,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
-            marker.showInfoWindow();
+            sw_bus_point.showInfoWindow();
 
 
         }
@@ -590,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
 
-            marker.showInfoWindow();
+            checkPostStart.showInfoWindow();
 
         }
         if (marker.equals(checkPostEnd)) {
@@ -600,7 +599,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
 
-            marker.showInfoWindow();
+            checkPostEnd.showInfoWindow();
         }
 
 
