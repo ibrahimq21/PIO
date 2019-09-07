@@ -2,18 +2,26 @@ package com.example.pio;
 
 import android.Manifest.permission;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.StrictMode;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -25,7 +33,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 
 import com.example.ptsdblibrary.PointProfileBean;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,35 +55,37 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.navigation.NavigationView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class MainActivity extends AppCompatActivity implements PointProfilehelper, GeoTask.Geo, NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
+        NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener, VehicleLocationActivity.VehicleLocationHelper {
 
     private static final String TAG = "MainActivity";
 
 
-    private JSONObject jo;
+    private int driverid;
 
-    private double lat;
-    private double lng;
+
+    private double current_lat;
+    private double current_lng;
+
+    private static final int REQUEST_CHECK_SETTINGS = 25;
+
+    private boolean PRE_ALERT_FLAG = true;
 
     private String duration, distance;
+
+    private Float start_rotation = 0.5f;
 
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
@@ -79,8 +95,16 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     private Marker busLocation;
     private Marker sw_bus_point;
 
+    private LocationRequest mLocationRequest = null;
+    private Location mCurrentLocation = null;
+
 
     private Polyline mPolyline;
+
+    private List<PointProfileBean> pointProfileData;
+
+    private static final long INTERVAL = 1;
+    private static final long FASTEST_INTERVAL = 1;
 
     private static final String FINE_LOCATION = permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = permission.ACCESS_COARSE_LOCATION;
@@ -91,7 +115,8 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient = null;
+    private GoogleApiClient mGoogleApiClient;
+    private LocationManager manager;
 
 
     protected int getLayoutId() {
@@ -105,9 +130,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
         getLocationPermission();
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-        StrictMode.setThreadPolicy(policy);
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -115,6 +137,12 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
 
         toolbar.setNavigationContentDescription(R.layout.search_bar);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this::onConnectionFailed)
+                .build();
 
         setSupportActionBar(toolbar);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -124,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        retro();
 
 
         findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
@@ -138,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             }
         });
 
-        new PointProfileTask(this).execute();
+
 
 
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -146,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
             public boolean onQueryTextSubmit(String query) {
 
 
-                if (query.equals(pointProfileBean.getDriverid())) {
+                if (query.equals(Integer.toString(driverid))) {
 
 
                     getRouteK();
@@ -154,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
                 }
 
 
+                Log.d(TAG, "pointProfileBean.getDriver_id() : " + driverid);
                 Log.d(TAG, query);
 
 
@@ -170,6 +202,68 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 //        hideSoftKeyboard();
 
 
+    }
+
+    public void retro() {
+
+        Log.d(TAG, "Calling Method : retro()");
+
+
+        try {
+            Retrofit retro = new Retrofit.Builder()
+                    .baseUrl(ApiURL.BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            ApiService service = retro.create(ApiService.class);
+            Call<List<PointProfileBean>> call = service.getPointProfilesDetails();
+
+            call.enqueue(new Callback<List<PointProfileBean>>() {
+                @Override
+                public void onResponse(Call<List<PointProfileBean>> call, Response<List<PointProfileBean>> response) {
+
+
+                    List<PointProfileBean> pointProfileData = response.body();
+
+                    for (int i = 0; i < pointProfileData.size(); i++) {
+
+
+                        Log.d(TAG, "JSON DATA " + pointProfileData.get(i).getRoute());
+                        Log.d(TAG, "Vehicle id   " + pointProfileData.get(i).getVehicle_id());
+
+                        driverid = pointProfileData.get(i).getVehicle_id();
+
+                        current_lat = pointProfileData.get(i).getCurrent_lat();
+                        current_lng = pointProfileData.get(i).getCurrent_lng();
+
+                        busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
+                        .position(new LatLng(current_lat, current_lng))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1))
+                        );
+
+
+                    }
+
+
+                }
+
+                @Override
+                public void onFailure(Call<List<PointProfileBean>> call, Throwable t) {
+                    Log.d(TAG, "Retrofit2 Error: " + t.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, "Retrofit2 Exception: " + e.getMessage());
+
+        }
+
+
+    }
+
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
 
@@ -288,125 +382,19 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         }
     }
 
-    public static int getResponseCode(String urlString) throws MalformedURLException, IOException {
-        URL u = new URL(urlString);
-        HttpURLConnection huc = (HttpURLConnection) u.openConnection();
-        huc.setRequestMethod("GET");
-        huc.connect();
-        Log.d(TAG, "Responce Code :" + huc.getResponseCode());
-        return huc.getResponseCode();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdate();
+        }
     }
 
 
-    private void getDriverLocation() throws MalformedURLException, JSONException, IOException {
-
-        /*This method will get the location of driver by getting the latitute
-         and longitude from the database and then put this in moveCamera method*/
 
 
-        String link = "http://10.0.2.2/afnan/fetchPointdet.php";
-
-
-        if (getResponseCode(link) != 200) {
-
-            moveCamera(CheckPostData.CHECK_POST_SW, 15f, "");
-            Toast.makeText(this, "Cannot find Bus location. Try Search route", Toast.LENGTH_SHORT).show();
-
-        } else {
-            URL url = new URL(link);
-        }
-
-
-        HttpClient client = new DefaultHttpClient();
-        HttpGet req = new HttpGet();
-        try {
-            req.setURI(new URI(link));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-
-        HttpResponse res = client.execute(req);
-        BufferedReader in = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
-
-        String out = in.readLine();
-
-        JSONArray ja = new JSONArray(out);
-
-        for (int i = 0; i < ja.length(); i++) {
-
-            jo = ja.getJSONObject(i);
-            lat = jo.getDouble("current_lat");
-            lng = jo.getDouble("current_lng");
-
-            pointProfileBean.setLng(lng);
-
-            pointProfileBean.setLat(lat);
-
-            //Log.d(TAG, "current_lng  :"+pointProfileBean.getLng()+"\n"+"current_lat :"+pointProfileBean.getLat());
-
-            BitmapDescriptor busIcon = BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1);
-
-
-            MarkerOptions options = new MarkerOptions().position(new LatLng(pointProfileBean.getLat(), pointProfileBean.getLng())).title("Bus Location").icon(busIcon);
-
-
-            busLocation = mMap.addMarker(options);
-        }
-
-//            Log.d(TAG, "IOException " + e.getMessage());
-
-//            Log.d(TAG, "JSONException " + e.getMessage());
-
-
-        Log.d(TAG, "getDriverLocation: getting the drivers devices current location Latitude: " + pointProfileBean.getLat() + "\n Longitude: " + pointProfileBean.getLng());
-
-
-        moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
-
-
-
-
-
-
-        /*Intent intent = new Intent(this, DistanceActivity.class);
-        intent.putExtra("point_profile", pointProfileBean);
-        startActivity(intent);*/
-
-
-    }
-
-    /*private void getDeviceLocation() {
-        Log.d(TAG, "getDeviceLocation: getting the devices current location");
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
-
-        try {
-            if (mLocationPermissionsGranted) {
-
-                final Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: found location!");
-                            Location currentLocation = (Location) task.getResult();
-
-                            moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-                                    DEFAULT_ZOOM,
-                                    "My Location");
-
-                        } else {
-                            Log.d(TAG, "onComplete: current location is null");
-                            Toast.makeText(MainActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
-        }
-    }*/
 
 
     private void moveCamera(LatLng latLng, float defaultZoom, String location) {
@@ -479,13 +467,23 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         this.mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
 
-        try {
-            getDriverLocation();
-        } catch (JSONException e) {
-            Log.d(TAG, "JSONException: " + e.getMessage());
-        } catch (IOException e) {
-            Log.d(TAG, "IOException: " + e.getMessage());
+
+        if (checkSelfPermission(permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
         }
+        mMap.setMyLocationEnabled(true);
+
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
+
+
         mMap.setOnInfoWindowClickListener(this);
 
 
@@ -510,29 +508,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         return url;
     }
 
-    private String getUrl(LatLng origin, LatLng dest, String directionMode) {
-
-
-//        origin of route
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-
-//        Destination of route
-
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-
-//        Mode
-
-        String mode = "mode=" + directionMode;
-
-        String parameter = str_origin + "&" + str_dest + "&" + mode;
-
-        String output = "json";
-
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameter + "&key=" + getString(R.string.google_maps_key);
-
-        return url;
-    }
-
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -540,7 +515,7 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
         Log.d(TAG, "onMarkerClick: called");
         if (marker.equals(busLocation)) {
 
-                getRouteK();
+            getRouteK();
 
            /* String url = getUrl(checkPostStart.getPosition(), checkPostEnd.getPosition(),"driving");
             new FetchURL(this).execute(url,"driving");*/
@@ -564,9 +539,6 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
         return false;
     }
-
-
-
 
 
     @Override
@@ -619,11 +591,138 @@ public class MainActivity extends AppCompatActivity implements PointProfilehelpe
 
     }
 
+
+
     @Override
-    public void setDriverId(String param) {
+    public void onConnected(@Nullable Bundle bundle) {
+        startLocationUpdate();
+    }
 
-        pointProfileBean.setDriverid(param);
-        Log.d(TAG, "setDriverId(String param) : " + param);
+    protected void startLocationUpdate() {
+        if (checkSelfPermission(permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
+        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
 
+    @Override
+    public void onConnectionSuspended(int i) {
+        if (i == 1) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        moveVechile(busLocation, location);
+        rotateMarker(busLocation, location.getBearing(), start_rotation);
+    }
+
+    protected void stopLocationUpdates() {
+
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
+        Log.e(TAG, "Location update stopped .......................");
+    }
+
+    public void moveVechile(final Marker myMarker, final Location finalPosition) {
+
+        final LatLng startPosition = myMarker.getPosition();
+
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final float durationInMs = 3000;
+        final boolean hideMarker = false;
+
+        handler.post(new Runnable() {
+            long elapsed;
+            float t;
+            float v;
+
+            @Override
+            public void run() {
+                // Calculate progress using interpolator
+                elapsed = SystemClock.uptimeMillis() - start;
+                t = elapsed / durationInMs;
+                v = interpolator.getInterpolation(t);
+
+                LatLng currentPosition = new LatLng(
+                        startPosition.latitude * (1 - t) + (finalPosition.getLatitude()) * t,
+                        startPosition.longitude * (1 - t) + (finalPosition.getLongitude()) * t);
+                myMarker.setPosition(currentPosition);
+                // myMarker.setRotation(finalPosition.getBearing());
+
+
+                // Repeat till progress is completeelse
+                if (t < 1) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                    // handler.postDelayed(this, 100);
+                } else {
+                    if (hideMarker) {
+                        myMarker.setVisible(false);
+                    } else {
+                        myMarker.setVisible(true);
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    public void rotateMarker(final Marker marker, final float toRotation, final float st) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final float startRotation = st;
+        final long duration = 1555;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                float rot = t * toRotation + (1 - t) * startRotation;
+
+
+                marker.setRotation(-rot > 180 ? rot / 2 : rot);
+                start_rotation = -rot > 180 ? rot / 2 : rot;
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
+    }
+
+    public void makeMarker(int color, String title, LatLng latLng) {
+
+        mMap.addMarker(new MarkerOptions()
+                .icon((BitmapDescriptorFactory
+                        .fromResource(color)))
+                .title(title)
+                .position(latLng));
+
+    }
+
+    @Override
+    public void setVehicleCurrentLocation(Marker marker) {
+        busLocation = marker;
     }
 }
