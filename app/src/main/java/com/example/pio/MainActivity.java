@@ -2,14 +2,18 @@ package com.example.pio;
 
 import android.Manifest.permission;
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +33,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
@@ -55,7 +60,9 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -68,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        LocationListener, VehicleLocationActivity.VehicleLocationHelper {
+        LocationListener, GoogleMap.OnMapClickListener {
 
     private static final String TAG = "MainActivity";
 
@@ -81,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private static final int REQUEST_CHECK_SETTINGS = 25;
 
+    private SuggestionAdapter mSuggestAdapter;
+
     private boolean PRE_ALERT_FLAG = true;
 
     private String duration, distance;
@@ -90,10 +99,17 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
 
-    private Marker checkPostStart;
+   /* private Marker checkPostStart;
     private Marker checkPostEnd;
     private Marker busLocation;
-    private Marker sw_bus_point;
+    private Marker sw_bus_point;*/
+
+    /**
+     * Keeps track of the selected marker.
+     */
+    private Marker mSelectedMarker;
+
+    private LatLng bus_location;
 
     private LocationRequest mLocationRequest = null;
     private Location mCurrentLocation = null;
@@ -103,6 +119,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private List<PointProfileBean> pointProfileData;
 
+    private ArrayList<Integer> mListSuggestionInt = new ArrayList<Integer>();
+
     private static final long INTERVAL = 1;
     private static final long FASTEST_INTERVAL = 1;
 
@@ -111,6 +129,13 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 17f;
 
+    private CursorAdapter searchAdapter;
+
+    private MatrixCursor mCursor;
+
+    private SearchView searchBar;
+
+    private Menu menu;
 
     //vars
     private Boolean mLocationPermissionsGranted = false;
@@ -133,10 +158,10 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        SearchView searchBar = findViewById(R.id.searchbar);
 
 
-        toolbar.setNavigationContentDescription(R.layout.search_bar);
+
+//        toolbar.setNavigationContentDescription(R.layout.search_bar);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -162,9 +187,12 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             public void onClick(View view) {
                 if (mPolyline.isVisible()) {
                     mPolyline.remove();
-                    sw_bus_point.remove();
+                    mMap.clear();
+
+                   /* sw_bus_point.remove();
                     checkPostEnd.remove();
-                    checkPostStart.remove();
+                    checkPostStart.remove();*/
+
                 }
             }
         });
@@ -172,34 +200,63 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
 
 
-        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
 
 
-                if (query.equals(Integer.toString(driverid))) {
 
 
-                    getRouteK();
 
-                }
-
-
-                Log.d(TAG, "pointProfileBean.getDriver_id() : " + driverid);
-                Log.d(TAG, query);
-
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
 
 
 //        hideSoftKeyboard();
+
+
+    }
+
+    private void startSuggestion(final String search){
+
+        if(mListSuggestionInt != null){
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    searchBar.setSuggestionsAdapter(null);
+                    mSuggestAdapter = null;
+
+
+
+
+
+
+
+
+                    mCursor = new MatrixCursor(new String[] {"_id","text"});
+
+                    Object[] mTempData = new Object[]{0, "default"};
+
+                    int size = mListSuggestionInt.size();
+
+                    mCursor.close();
+
+                    for(int i=0; i < size; i++){
+                        mTempData[0] = i;
+                        mTempData[1] = mListSuggestionInt.get(i);
+                        mCursor.addRow(mTempData);
+                    }
+
+                    mSuggestAdapter = new SuggestionAdapter(MainActivity.this, mCursor, mListSuggestionInt);
+
+                    searchBar.setSuggestionsAdapter(mSuggestAdapter);
+
+
+
+                }
+            });
+
+        }
+
+
+
 
 
     }
@@ -232,11 +289,15 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                         driverid = pointProfileData.get(i).getVehicle_id();
 
+                        mListSuggestionInt.add(driverid);
+
                         current_lat = pointProfileData.get(i).getCurrent_lat();
                         current_lng = pointProfileData.get(i).getCurrent_lng();
 
-                        busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
-                        .position(new LatLng(current_lat, current_lng))
+                        bus_location = new LatLng(current_lat, current_lng);
+
+                        mMap.addMarker(new MarkerOptions().title("SW Bus")
+                        .position(bus_location)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1))
                         );
 
@@ -267,35 +328,25 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     }
 
 
-    private void getRouteK() {
+    private void addMarkerAndRoute() {
 
 
-        sw_bus_point = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point"));
-        sw_bus_point.setSnippet("Click here");
 
-        moveCamera(sw_bus_point.getPosition(), 15f, "");
+        mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point")).setSnippet("Click here");
 
-        checkPostStart = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_START).title("Check post Start"));
+
+
 
         BitmapDescriptor checkPoststart_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
 
-        checkPostStart.setIcon(checkPoststart_ic);
-
-        checkPostStart.setVisible(true);
-        checkPostStart.setSnippet("Click here");
+        mMap.addMarker(new MarkerOptions().icon(checkPoststart_ic).position(CheckPostData.CHECK_POST_START).title("Check post Start")).setSnippet("Click here");
 
 
-        checkPostEnd = mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End"));
+
+
 
         BitmapDescriptor checkPostEnd_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons2);
-
-        checkPostEnd.setIcon(checkPostEnd_ic);
-
-        checkPostEnd.setVisible(true);
-
-        checkPostEnd.setTag(0);
-
-        checkPostEnd.setSnippet("Click here");
+        mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End").icon(checkPostEnd_ic)).setSnippet("Click here");
 
         if (mPolyline != null)
             mPolyline.remove();
@@ -326,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                         CheckPostData.CHECK_POST_FACULTY_ROAD_20,
                         CheckPostData.CHECK_POST_FACULTY_ROAD_21,
                         CheckPostData.CHECK_POST_START));
+
     }
 
 
@@ -413,6 +465,91 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.drawer_main, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        searchBar = (SearchView) menu.findItem(R.id.searchbar).getActionView();
+        searchBar.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchBar.setSubmitButtonEnabled(true);
+        searchBar.setQueryHint(Html.fromHtml("<font color = #ffffff>"+getResources().getString(R.string.place_autocomplete_search_hint)+"</font>"));
+
+
+
+
+
+
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+
+                if (query.equals(Integer.toString(driverid))) {
+
+
+                    addMarkerAndRoute();
+
+                }
+
+
+                Log.d(TAG, "pointProfileBean.getDriver_id() : " + driverid);
+                Log.d(TAG, query);
+
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, newText);
+                startSuggestion(newText);
+                return false;
+            }
+        });
+
+        searchBar.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+
+
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+
+                if (mListSuggestionInt != null && mListSuggestionInt.size() > 0) {
+                    searchBar.setQuery(Integer.toString(mListSuggestionInt.get(position)), false);
+                    if(mListSuggestionInt.get(position).equals(driverid)){
+                        addMarkerAndRoute();
+                    }
+                }
+                return false;
+
+
+
+            }
+        });
+
+        searchBar.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+
+                if (mPolyline.isVisible()) {
+                    mPolyline.remove();
+                    mMap.clear();
+                    /*sw_bus_point.remove();
+                    checkPostEnd.remove();
+                    checkPostStart.remove();*/
+                }
+
+                return false;
+            }
+        });
+
+
+
+        this.menu = menu;
+
+
         return true;
     }
 
@@ -461,11 +598,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onMapReady: map is ready");
 
+
         if (mMap != null) {
             return;
         }
         this.mMap = googleMap;
-        mMap.setOnMarkerClickListener(this);
 
 
         if (checkSelfPermission(permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -478,13 +615,16 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             // for Activity#requestPermissions for more details.
             return;
         }
+        moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
+        mMap.setOnMarkerClickListener(this);
         mMap.setMyLocationEnabled(true);
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
 
 
         mMap.setOnInfoWindowClickListener(this);
+
+        mMap.setOnMapClickListener(this);
 
 
     }
@@ -513,28 +653,74 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     public boolean onMarkerClick(Marker marker) {
 
         Log.d(TAG, "onMarkerClick: called");
-        if (marker.equals(busLocation)) {
 
-            getRouteK();
+       /* if (marker.equals(mSelectedMarker)) {
+            // The showing info window has already been closed - that's the first thing to happen
+            // when any marker is clicked.
+            // Return true to indicate we have consumed the event and that we do not want the
+            // the default behavior to occur (which is for the camera to move such that the
+            // marker is centered and for the marker's info window to open, if it has one).
+            mSelectedMarker = null;
+            return true;
+        }*/
+
+
+        mSelectedMarker = marker;
+
+        if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Bus")) {
+
+            Log.d(TAG, "SW Bus Marker selected");
+
+            addMarkerAndRoute();
 
            /* String url = getUrl(checkPostStart.getPosition(), checkPostEnd.getPosition(),"driving");
             new FetchURL(this).execute(url,"driving");*/
 
-        }
-        if (marker.equals(sw_bus_point)) {
-            sw_bus_point.setSnippet("Click here");
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
-        }
-        if (marker.equals(checkPostStart)) {
-            checkPostStart.setSnippet("Click here");
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
 
         }
-        if (marker.equals(checkPostEnd)) {
-            checkPostEnd.setSnippet("Click here");
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
+        else if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Bus Point")) {
+            Log.d(TAG, "SW Bus Point Marker selected");
+
+//            sw_bus_point = mSelectedMarker;
+
+//            Log.d(TAG, "SW Bus Point Marker selected: sw_bus_point marker title: "+sw_bus_point.getTitle());
+
+            mSelectedMarker.setTitle("SW Bus Point");
+            mSelectedMarker.setSnippet("Click here");
+            mSelectedMarker.setVisible(true);
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
+
 
         }
+        else if (mSelectedMarker.getTitle().equalsIgnoreCase("Check post Start")) {
+            Log.d(TAG, "Check post Start Marker selected");
+//            checkPostStart = mSelectedMarker;
+
+            mSelectedMarker.setTitle("Check post Start");
+            mSelectedMarker.setSnippet("Click here");
+            mSelectedMarker.setVisible(true);
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
+
+
+
+        }
+        else if (mSelectedMarker.getTitle().equalsIgnoreCase("Check Post End")) {
+            Log.d(TAG, "Check Post End Marker selected");
+//            checkPostEnd = mSelectedMarker;
+
+
+            mSelectedMarker.setTitle("Check Post End");
+            mSelectedMarker.setSnippet("Click here");
+            mSelectedMarker.setVisible(true);
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
+
+
+
+        }
+
+
+
+
 
 
         return false;
@@ -544,34 +730,45 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     @Override
     public void onInfoWindowClick(Marker marker) {
         Log.d(TAG, "onInfoWindowClick: called");
-        if (marker.equals(sw_bus_point)) {
-            sw_bus_point.setTitle("SW Bus Point");
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), sw_bus_point.getPosition()));
+
+        mSelectedMarker = marker;
+
+        if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Bus Point")) {
+            mSelectedMarker.setVisible(true);
+//            sw_bus_point = mSelectedMarker;
+
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
-            sw_bus_point.showInfoWindow();
+            mSelectedMarker.showInfoWindow();
+
+
 
 
         }
-        if (marker.equals(checkPostStart)) {
-            checkPostStart.setTitle("Check Post Start Faculty Road Route");
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostStart.getPosition()));
+        if (mSelectedMarker.getTitle().equalsIgnoreCase("Check post Start")) {
+            mSelectedMarker.setVisible(true);
+//            checkPostStart = mSelectedMarker;
+
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
 
 
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
 
-            checkPostStart.showInfoWindow();
+            mSelectedMarker.showInfoWindow();
 
         }
-        if (marker.equals(checkPostEnd)) {
-            checkPostEnd.setTitle("Check Post End Faculty Road Route");
+        if (mSelectedMarker.getTitle().equalsIgnoreCase("Check Post End")) {
+            mSelectedMarker.setVisible(true);
+//            checkPostEnd = mSelectedMarker;
 
-            new GeoTask(this).execute(getDistanceURl(busLocation.getPosition(), checkPostEnd.getPosition()));
+
+            new GeoTask(this).execute(getDistanceURl(bus_location, mSelectedMarker.getPosition()));
             mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(this));
 
 
-            checkPostEnd.showInfoWindow();
+            mSelectedMarker.showInfoWindow();
         }
 
 
@@ -583,9 +780,10 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         duration = res[0];
         distance = res[1];
 
-        sw_bus_point.setSnippet("duration : " + duration + "\ndistance: " + distance);
+        mSelectedMarker.setSnippet("duration : " + duration + "\ndistance: " + distance);
+        /*sw_bus_point.setSnippet("duration : " + duration + "\ndistance: " + distance);
         checkPostStart.setSnippet("duration : " + duration + "\ndistance: " + distance);
-        checkPostEnd.setSnippet("duration : " + duration + "\ndistance: " + distance);
+        checkPostEnd.setSnippet("duration : " + duration + "\ndistance: " + distance);*/
 
         Log.d(TAG, "duration : " + duration + "\ndistance: " + distance);
 
@@ -626,8 +824,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     @Override
     public void onLocationChanged(Location location) {
-        moveVechile(busLocation, location);
-        rotateMarker(busLocation, location.getBearing(), start_rotation);
+        moveVechile(mSelectedMarker, location);
+        rotateMarker(mSelectedMarker, location.getBearing(), start_rotation);
     }
 
     protected void stopLocationUpdates() {
@@ -721,8 +919,13 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     }
 
+
     @Override
-    public void setVehicleCurrentLocation(Marker marker) {
-        busLocation = marker;
+    public void onMapClick(LatLng latLng) {
+
+        // Any showing info window closes when the map is clicked.
+        // Clear the currently selected marker.
+        mSelectedMarker = null;
+
     }
 }
