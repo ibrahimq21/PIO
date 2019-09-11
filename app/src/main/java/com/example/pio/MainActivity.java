@@ -5,8 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-
-import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.location.Location;
 import android.location.LocationManager;
@@ -33,9 +31,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.drawerlayout.widget.DrawerLayout;
-
 
 import com.example.ptsdblibrary.PointProfileBean;
 import com.google.android.gms.common.ConnectionResult;
@@ -52,8 +48,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-
-
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -62,7 +56,8 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -86,11 +81,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     private double current_lat;
     private double current_lng;
 
-    private static final int REQUEST_CHECK_SETTINGS = 25;
+
 
     private SuggestionAdapter mSuggestAdapter;
 
-    private boolean PRE_ALERT_FLAG = true;
+
 
     private String duration, distance;
 
@@ -99,20 +94,17 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
 
-   /* private Marker checkPostStart;
-    private Marker checkPostEnd;
-    private Marker busLocation;
-    private Marker sw_bus_point;*/
+
 
     /**
      * Keeps track of the selected marker.
      */
-    private Marker mSelectedMarker;
+    private Marker mSelectedMarker, busLocation;
 
     private LatLng bus_location;
 
     private LocationRequest mLocationRequest = null;
-    private Location mCurrentLocation = null;
+
 
 
     private Polyline mPolyline;
@@ -129,9 +121,10 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final float DEFAULT_ZOOM = 17f;
 
-    private CursorAdapter searchAdapter;
+
 
     private MatrixCursor mCursor;
+
 
     private SearchView searchBar;
 
@@ -179,7 +172,27 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        retro();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final Handler handler = new Handler();
+                Timer t = new Timer();
+                t.schedule(new TimerTask() {
+                    public void run() {
+                        handler.post(new Runnable() {
+                            public void run() {
+                                //DO SOME ACTIONS HERE , THIS ACTIONS WILL WILL EXECUTE AFTER 5 SECONDS...
+                                handler.postDelayed(this, 5000);
+                                retro();
+                            }
+                        });
+                    }
+                }, 5000);
+            }
+        });
+
+
+
 
 
         findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
@@ -187,11 +200,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             public void onClick(View view) {
                 if (mPolyline.isVisible()) {
                     mPolyline.remove();
-                    mMap.clear();
 
-                   /* sw_bus_point.remove();
-                    checkPostEnd.remove();
-                    checkPostStart.remove();*/
 
                 }
             }
@@ -263,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     public void retro() {
 
-        Log.d(TAG, "Calling Method : retro()");
+//        Log.d(TAG, "Calling Method : retro()");
 
 
         try {
@@ -284,8 +293,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                     for (int i = 0; i < pointProfileData.size(); i++) {
 
 
-                        Log.d(TAG, "JSON DATA " + pointProfileData.get(i).getRoute());
-                        Log.d(TAG, "Vehicle id   " + pointProfileData.get(i).getVehicle_id());
+                      /*  Log.d(TAG, "JSON DATA " + pointProfileData.get(i).getRoute());
+                        Log.d(TAG, "Vehicle id   " + pointProfileData.get(i).getVehicle_id());*/
 
                         driverid = pointProfileData.get(i).getVehicle_id();
 
@@ -296,10 +305,26 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                         bus_location = new LatLng(current_lat, current_lng);
 
-                        mMap.addMarker(new MarkerOptions().title("SW Bus")
+
+
+
+
+
+
+                        /*busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
                         .position(bus_location)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1))
-                        );
+                        );*/
+
+                        if (busLocation != null) {
+
+                            moveVechile(busLocation, bus_location);
+                            rotateMarker(busLocation, busLocation.getRotation(), start_rotation);
+                        }
+
+
+
+
 
 
                     }
@@ -626,6 +651,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         mMap.setOnMapClickListener(this);
 
+        busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
+                .position(CheckPostData.CHECK_POST_SW)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1))
+        );
+
 
     }
 
@@ -781,9 +811,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         distance = res[1];
 
         mSelectedMarker.setSnippet("duration : " + duration + "\ndistance: " + distance);
-        /*sw_bus_point.setSnippet("duration : " + duration + "\ndistance: " + distance);
-        checkPostStart.setSnippet("duration : " + duration + "\ndistance: " + distance);
-        checkPostEnd.setSnippet("duration : " + duration + "\ndistance: " + distance);*/
+
 
         Log.d(TAG, "duration : " + duration + "\ndistance: " + distance);
 
@@ -824,8 +852,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     @Override
     public void onLocationChanged(Location location) {
-        moveVechile(mSelectedMarker, location);
-        rotateMarker(mSelectedMarker, location.getBearing(), start_rotation);
+
     }
 
     protected void stopLocationUpdates() {
@@ -835,7 +862,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         Log.e(TAG, "Location update stopped .......................");
     }
 
-    public void moveVechile(final Marker myMarker, final Location finalPosition) {
+    public void moveVechile(final Marker myMarker, final LatLng finalPosition) {
 
         final LatLng startPosition = myMarker.getPosition();
 
@@ -858,8 +885,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                 v = interpolator.getInterpolation(t);
 
                 LatLng currentPosition = new LatLng(
-                        startPosition.latitude * (1 - t) + (finalPosition.getLatitude()) * t,
-                        startPosition.longitude * (1 - t) + (finalPosition.getLongitude()) * t);
+                        startPosition.latitude * (1 - t) + (finalPosition.latitude) * t,
+                        startPosition.longitude * (1 - t) + (finalPosition.longitude) * t);
                 myMarker.setPosition(currentPosition);
                 // myMarker.setRotation(finalPosition.getBearing());
 
@@ -928,4 +955,6 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         mSelectedMarker = null;
 
     }
+
+
 }
