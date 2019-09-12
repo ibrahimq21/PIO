@@ -56,8 +56,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -91,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private String duration, distance;
 
-    private Float start_rotation = 0.5f;
+    private Float start_rotation = 0.15f;
 
 
     private PointProfileBean pointProfileBean = new PointProfileBean();
@@ -173,23 +171,19 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+        createLocationRequest();
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 final Handler handler = new Handler();
-                Timer t = new Timer();
-                t.schedule(new TimerTask() {
+                handler.post(new Runnable() {
                     public void run() {
-                        handler.post(new Runnable() {
-                            public void run() {
-                                //DO SOME ACTIONS HERE , THIS ACTIONS WILL WILL EXECUTE AFTER 5 SECONDS...
-                                handler.postDelayed(this, 5000);
-                                retro();
-                            }
-                        });
+                        //DO SOME ACTIONS HERE , THIS ACTIONS WILL WILL EXECUTE AFTER 5 SECONDS...
+                        handler.postDelayed(this, 5000);
+                        fetchPointProfilesData();
                     }
-                }, 5000);
+                });
             }
         });
 
@@ -203,9 +197,19 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mPolyline.isVisible()) {
-                    mPolyline.remove();
+                try {
 
+                    if (mPolyline.isVisible()) {
+                        mPolyline.remove();
+                        try {
+                            mSelectedMarker.remove();
+                        } catch (NullPointerException e) {
+                            Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                } catch (NullPointerException e) {
+                    Toast.makeText(MainActivity.this, "no polyline is displayed.", Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -259,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     }
 
-    public void retro() {
+    public void fetchPointProfilesData() {
 
 //        Log.d(TAG, "Calling Method : retro()");
 
@@ -350,23 +354,20 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private void addMarkerAndRoute() {
 
-
-
-        mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_SW).title("SW Bus Point")).setSnippet("Click here");
-
-
-
-
         BitmapDescriptor checkPoststart_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons1);
 
-        mMap.addMarker(new MarkerOptions().icon(checkPoststart_ic).position(CheckPostData.CHECK_POST_START).title("Check post Start")).setSnippet("Click here");
+
+        mMap.addMarker(new MarkerOptions().flat(true).icon(checkPoststart_ic).position(CheckPostData.CHECK_POST_SW).title("SW Bus Point")).setSnippet("Click here");
+
+
+        mMap.addMarker(new MarkerOptions().icon(checkPoststart_ic).flat(true).position(CheckPostData.CHECK_POST_START).title("Check post Start")).setSnippet("Click here");
 
 
 
 
 
         BitmapDescriptor checkPostEnd_ic = BitmapDescriptorFactory.fromResource(R.drawable.icons2);
-        mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).title("Check Post End").icon(checkPostEnd_ic)).setSnippet("Click here");
+        mMap.addMarker(new MarkerOptions().position(CheckPostData.CHECK_POST_END).flat(true).title("Check Post End").icon(checkPostEnd_ic)).setSnippet("Click here");
 
         if (mPolyline != null)
             mPolyline.remove();
@@ -555,7 +556,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                 if (mPolyline.isVisible()) {
                     mPolyline.remove();
-                    mMap.clear();
+                    try {
+                        mSelectedMarker.remove();
+                    } catch (NullPointerException e) {
+                        Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
+                    }
                     /*sw_bus_point.remove();
                     checkPostEnd.remove();
                     checkPostStart.remove();*/
@@ -648,8 +653,9 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
                 .position(CheckPostData.CHECK_POST_SW)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.muetbusx1))
-        );
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.minibus_xhdpi_40px)));
+
+        busLocation.setFlat(true);
 
 
     }
