@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, GoogleMap.OnMapClickListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
 
     private int driverid;
@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
     private double current_lat;
     private double current_lng;
+
+    private ArrayList<Double> latitude, longitude;
 
 
 
@@ -153,8 +155,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         Toolbar toolbar = findViewById(R.id.toolbar);
 
 
-
-//        toolbar.setNavigationContentDescription(R.layout.search_bar);
+        latitude = new ArrayList<Double>();
+        longitude = new ArrayList<Double>();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -191,7 +193,10 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             }
         });
 
-
+       /* if(latitude.size() == 5 & longitude.size() == 5){
+            latitude.remove(5);
+            longitude.remove(5);
+        }*/
 
 
 
@@ -207,16 +212,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         });
 
 
-
-
-
-
-
-
-
-
-
-//        hideSoftKeyboard();
+        hideSoftKeyboard();
 
 
     }
@@ -231,13 +227,6 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     searchBar.setSuggestionsAdapter(null);
                     mSuggestAdapter = null;
-
-
-
-
-
-
-
 
                     mCursor = new MatrixCursor(new String[] {"_id","text"});
 
@@ -303,7 +292,13 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                         current_lat = pointProfileData.get(i).getCurrent_lat();
                         current_lng = pointProfileData.get(i).getCurrent_lng();
 
+                        /*latitude.add(current_lat);
+                        longitude.add(current_lng);*/
+
+
+
                         bus_location = new LatLng(current_lat, current_lng);
+
 
 
 
