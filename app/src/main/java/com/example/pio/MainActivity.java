@@ -79,13 +79,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     private double current_lat;
     private double current_lng;
 
-    private ArrayList<Double> latitude, longitude;
-
-
-
     private SuggestionAdapter mSuggestAdapter;
-
-
 
     private String duration, distance;
 
@@ -153,8 +147,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         Toolbar toolbar = findViewById(R.id.toolbar);
 
 
-        latitude = new ArrayList<Double>();
-        longitude = new ArrayList<Double>();
+
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -209,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     }
                 } catch (NullPointerException e) {
-                    Toast.makeText(MainActivity.this, "no polyline is displayed.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "no route is displaying.", Toast.LENGTH_LONG).show();
 
                 }
             }
@@ -508,6 +501,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     addMarkerAndRoute();
 
+                } else {
+                    Toast.makeText(MainActivity.this, "Not found", Toast.LENGTH_LONG);
                 }
 
 
@@ -541,6 +536,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                     searchBar.setQuery(Integer.toString(mListSuggestionInt.get(position)), false);
                     if(mListSuggestionInt.get(position).equals(driverid)){
                         addMarkerAndRoute();
+                    } else {
+                        searchBar.setQuery("not found", false);
                     }
                 }
                 return false;
@@ -553,18 +550,22 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         searchBar.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
+                try {
 
-                if (mPolyline.isVisible()) {
-                    mPolyline.remove();
-                    try {
-                        mSelectedMarker.remove();
-                    } catch (NullPointerException e) {
-                        Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
+                    if (mPolyline.isVisible()) {
+                        mPolyline.remove();
+                        try {
+                            mSelectedMarker.remove();
+                        } catch (NullPointerException e) {
+                            Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
+                        }
+
                     }
-                    /*sw_bus_point.remove();
-                    checkPostEnd.remove();
-                    checkPostStart.remove();*/
+                } catch (NullPointerException e) {
+                    Toast.makeText(MainActivity.this, "no route is displaying", Toast.LENGTH_LONG).show();
+
                 }
+
 
                 return false;
             }
@@ -656,6 +657,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.minibus_xhdpi_40px)));
 
         busLocation.setFlat(true);
+        busLocation.setRotation(start_rotation);
 
 
     }

@@ -40,8 +40,10 @@
             android:value="@string/google_maps_key" />
 
 
-
-        <activity android:name=".Splash" android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".Splash"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
