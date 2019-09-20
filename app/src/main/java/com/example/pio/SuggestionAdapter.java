@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.cursoradapter.widget.CursorAdapter;
 
-
 import java.util.ArrayList;
 
 

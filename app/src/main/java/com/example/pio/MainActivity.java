@@ -15,7 +15,6 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -79,7 +78,12 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
     private double current_lat;
     private double current_lng;
 
+    private ArrayList<Double> latitude, longitude;
+
+
+
     private SuggestionAdapter mSuggestAdapter;
+
 
     private String duration, distance;
 
@@ -147,7 +151,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         Toolbar toolbar = findViewById(R.id.toolbar);
 
 
-
+        latitude = new ArrayList<Double>();
+        longitude = new ArrayList<Double>();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -187,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
 
 
-        findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
+        /*findViewById(R.id.ic_gps).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
@@ -202,11 +207,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     }
                 } catch (NullPointerException e) {
-                    Toast.makeText(MainActivity.this, "no route is displaying.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "no polyline is displayed.", Toast.LENGTH_LONG).show();
 
                 }
             }
-        });
+        });*/
 
 
         hideSoftKeyboard();
@@ -501,8 +506,6 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     addMarkerAndRoute();
 
-                } else {
-                    Toast.makeText(MainActivity.this, "Not found", Toast.LENGTH_LONG);
                 }
 
 
@@ -536,8 +539,6 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                     searchBar.setQuery(Integer.toString(mListSuggestionInt.get(position)), false);
                     if(mListSuggestionInt.get(position).equals(driverid)){
                         addMarkerAndRoute();
-                    } else {
-                        searchBar.setQuery("not found", false);
                     }
                 }
                 return false;
@@ -550,22 +551,18 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         searchBar.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-                try {
 
-                    if (mPolyline.isVisible()) {
-                        mPolyline.remove();
-                        try {
-                            mSelectedMarker.remove();
-                        } catch (NullPointerException e) {
-                            Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
-                        }
-
+                if (mPolyline.isVisible()) {
+                    mPolyline.remove();
+                    try {
+                        mSelectedMarker.remove();
+                    } catch (NullPointerException e) {
+                        Toast.makeText(MainActivity.this, "no marker selected", Toast.LENGTH_LONG).show();
                     }
-                } catch (NullPointerException e) {
-                    Toast.makeText(MainActivity.this, "no route is displaying", Toast.LENGTH_LONG).show();
-
+                    /*sw_bus_point.remove();
+                    checkPostEnd.remove();
+                    checkPostStart.remove();*/
                 }
-
 
                 return false;
             }
@@ -652,12 +649,11 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         mMap.setOnMapClickListener(this);
 
-        busLocation = mMap.addMarker(new MarkerOptions().title("SW Bus")
+        busLocation = mMap.addMarker(new MarkerOptions().title("SW Shutter")
                 .position(CheckPostData.CHECK_POST_SW)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.minibus_xhdpi_40px)));
 
         busLocation.setFlat(true);
-        busLocation.setRotation(start_rotation);
 
 
     }
@@ -700,9 +696,9 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         mSelectedMarker = marker;
 
-        if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Bus")) {
+        if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Shutter")) {
 
-            Log.d(TAG, "SW Bus Marker selected");
+//            Log.d(TAG, "SW Bus Marker selected");
 
             addMarkerAndRoute();
 
@@ -712,7 +708,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         }
         else if (mSelectedMarker.getTitle().equalsIgnoreCase("SW Bus Point")) {
-            Log.d(TAG, "SW Bus Point Marker selected");
+//            Log.d(TAG, "SW Bus Point Marker selected");
 
 //            sw_bus_point = mSelectedMarker;
 
@@ -726,7 +722,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         }
         else if (mSelectedMarker.getTitle().equalsIgnoreCase("Check post Start")) {
-            Log.d(TAG, "Check post Start Marker selected");
+//            Log.d(TAG, "Check post Start Marker selected");
 //            checkPostStart = mSelectedMarker;
 
             mSelectedMarker.setTitle("Check post Start");
@@ -738,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         }
         else if (mSelectedMarker.getTitle().equalsIgnoreCase("Check Post End")) {
-            Log.d(TAG, "Check Post End Marker selected");
+//            Log.d(TAG, "Check Post End Marker selected");
 //            checkPostEnd = mSelectedMarker;
 
 

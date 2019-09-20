@@ -55,6 +55,7 @@ public class GeoTask extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... strings) {
 
         try {
+            Log.d(this.getClass().getSimpleName(), "" + this.getClass().getSimpleName() + " Class Called");
             URL url=new URL(strings[0]);
             HttpURLConnection con= (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
@@ -89,11 +90,11 @@ public class GeoTask extends AsyncTask<String, Void, String> {
 
             }
         } catch (MalformedURLException e) {
-            Log.d("error", "error1");
+            Log.d("MalformedURLException :", e.getMessage());
         } catch (IOException e) {
-            Log.d("error", "error2");
+            Log.d("IOException : ", e.getMessage());
         } catch (JSONException e) {
-            Log.d("error","error3");
+            Log.d("JSONException :", e.getMessage());
         }
 
         return null;

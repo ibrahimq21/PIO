@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <fragment xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/map"
@@ -13,16 +12,16 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity" />
 
-    <ImageView
-        android:id="@+id/ic_gps"
-        android:contentDescription="@string/current_gps"
-        android:layout_width="wrap_content"
-        android:layout_height="61dp"
-        android:layout_alignEnd="@+id/map"
-        android:layout_alignBottom="@+id/map"
-        android:layout_marginEnd="29dp"
-        android:layout_marginBottom="76dp"
-        app:srcCompat="@drawable/ic_gps" />
+    <!-- <ImageView
+         android:id="@+id/ic_gps"
+         android:contentDescription="@string/current_gps"
+         android:layout_width="wrap_content"
+         android:layout_height="61dp"
+         android:layout_alignEnd="@+id/map"
+         android:layout_alignBottom="@+id/map"
+         android:layout_marginEnd="29dp"
+         android:layout_marginBottom="76dp"
+         app:srcCompat="@drawable/ic_gps" />-->
 
 
 
@@ -30,6 +29,6 @@
 </RelativeLayout>
 
 
-   <!-- tools:showIn="@layout/activity_drawer_main"-->
+
 
 
