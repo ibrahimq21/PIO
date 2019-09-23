@@ -44,7 +44,7 @@ public class SuggestionAdapter extends CursorAdapter {
             Log.d(TAG,"cursor.getPosition(): "+cursor.getPosition());
             Log.d(TAG,"mListItems.size(): "+mListItems.size());
             Log.d(TAG,"mListItems.get(cursor.getPosition()).toString(): "+mListItems.get(cursor.getPosition()).toString());
-            mTextView.setText(""+String.format(mListItems.get(cursor.getPosition()).toString()));
+            //mTextView.setText(""+String.format(mListItems.get(cursor.getPosition()).toString()));
             return view;
         }
         return null;

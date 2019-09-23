@@ -227,8 +227,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                 @Override
                 public void run() {
 
-                    searchBar.setSuggestionsAdapter(null);
-                    mSuggestAdapter = null;
+                   /* searchBar.setSuggestionsAdapter(null);
+                    mSuggestAdapter = null;*/
 
                     mCursor = new MatrixCursor(new String[] {"_id","text"});
 
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     int size = mListSuggestionInt.size();
 
-                    mCursor.close();
+//                    mCursor.close();
 
                     for(int i=0; i < size; i++){
                         mTempData[0] = i;
@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                         mCursor.addRow(mTempData);
                     }
 
-                    mSuggestAdapter = new SuggestionAdapter(MainActivity.this, mCursor, mListSuggestionInt);
+                    mSuggestAdapter = new SuggestionAdapter(getApplicationContext(), mCursor, mListSuggestionInt);
 
                     searchBar.setSuggestionsAdapter(mSuggestAdapter);
 
@@ -284,18 +284,12 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                     for (int i = 0; i < pointProfileData.size(); i++) {
 
 
-                      /*  Log.d(TAG, "JSON DATA " + pointProfileData.get(i).getRoute());
-                        Log.d(TAG, "Vehicle id   " + pointProfileData.get(i).getVehicle_id());*/
-
                         driverid = pointProfileData.get(i).getVehicle_id();
-
-                        mListSuggestionInt.add(driverid);
 
                         current_lat = pointProfileData.get(i).getCurrent_lat();
                         current_lng = pointProfileData.get(i).getCurrent_lng();
 
-                        /*latitude.add(current_lat);
-                        longitude.add(current_lng);*/
+
 
 
 
@@ -527,6 +521,8 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         searchBar.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
             public boolean onSuggestionSelect(int position) {
+
+                Log.d(MainActivity.class.getSimpleName(), "onSuggestionSelect : position:" + position);
 
 
                 return false;
