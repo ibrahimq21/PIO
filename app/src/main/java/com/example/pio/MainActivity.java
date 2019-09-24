@@ -4,6 +4,7 @@ import android.Manifest.permission;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.MatrixCursor;
 import android.location.Location;
@@ -593,18 +594,23 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
         int id = menuItem.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_slideshow) {
+            getApplicationContext().startActivity(new Intent(this, MainPageActivity.class));
 
-        } else if (id == R.id.nav_tools) {
+
+        } else if (id == R.id.nav_display_map) {
+            getApplicationContext().startActivity(new Intent(this, DisplayMapActivity.class));
+
+        } else if (id == R.id.nav_display_route) {
+            getApplicationContext().startActivity(new Intent(this, MainActivity.class));
+
+        }/* else if (id == R.id.nav_tools) {
 
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 
-        }
+        }*/
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

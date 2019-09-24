@@ -1,0 +1,65 @@
+[
+  {
+    "featureType": "administrative.country",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "saturation": "100"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "saturation": "88"
+      },
+      {
+        "lightness": "32"
+      },
+      {
+        "gamma": "10.00"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "lightness": 100
+      },
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "visibility": "on"
+      },
+      {
+        "hue": "#001fff"
+      },
+      {
+        "lightness": "100"
+      },
+      {
+        "saturation": "100"
+      }
+    ]
+  }
+]

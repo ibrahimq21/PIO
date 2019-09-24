@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".DisplayMapActivity"></activity>
+        <activity android:name=".DisplayMapActivity" />
         <activity android:name=".MainPageActivity" />
 
         <uses-library
