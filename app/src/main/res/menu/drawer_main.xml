@@ -9,8 +9,8 @@
 
     <item
         android:id="@+id/searchbar"
+        android:icon="@drawable/ic_magnify"
         android:title="@string/place_autocomplete_search_hint"
-        android:icon="@drawable/places_ic_search"
-        app:showAsAction="ifRoom|withText"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|withText" />
 </menu>

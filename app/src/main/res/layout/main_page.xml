@@ -4,40 +4,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainPageActivity">
+    tools:context="com.example.pio.MainPageActivity">
 
-    <ImageView
-        android:id="@+id/main_header"
-        android:layout_width="325dp"
-        android:layout_height="189dp"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="294dp"
+        android:layout_height="218dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/images" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/bus_route"
-        android:layout_width="167dp"
-        android:layout_height="62dp"
-        android:layout_marginTop="128dp"
-        android:text="@string/display_rut"
-        app:layout_constraintEnd_toEndOf="@+id/main_header"
-        app:layout_constraintHorizontal_bias="0.487"
-        app:layout_constraintStart_toStartOf="@+id/main_header"
-        app:layout_constraintTop_toBottomOf="@+id/main_header" />
+        <ImageView
+            android:id="@+id/main_header"
+            android:layout_width="259dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="60dp"
+            app:srcCompat="@drawable/images" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/display_uni_map"
-        android:layout_width="173dp"
-        android:layout_height="61dp"
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="274dp"
+        android:layout_height="161dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/display_map"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/bus_route"
-        app:layout_constraintStart_toStartOf="@+id/bus_route"
-        app:layout_constraintTop_toBottomOf="@+id/bus_route" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintVertical_bias="0.762">
+
+        <Button
+            android:id="@+id/bus_route"
+            android:layout_width="match_parent"
+            android:layout_height="69dp"
+            android:text="@string/display_rut" />
+
+        <Button
+            android:id="@+id/display_uni_map"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:layout_marginBottom="120dp"
+            android:text="@string/display_map" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

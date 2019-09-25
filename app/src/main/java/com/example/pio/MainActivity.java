@@ -595,14 +595,23 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
         if (id == R.id.nav_home) {
 
-            getApplicationContext().startActivity(new Intent(this, MainPageActivity.class));
+            getApplicationContext().startActivity(new Intent(this, MainPageActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+
+            finish();
+            finishAffinity();
+
+
+
+
 
 
         } else if (id == R.id.nav_display_map) {
-            getApplicationContext().startActivity(new Intent(this, DisplayMapActivity.class));
+            getApplicationContext().startActivity(new Intent(this, DisplayMapActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
 
         } else if (id == R.id.nav_display_route) {
-            getApplicationContext().startActivity(new Intent(this, MainActivity.class));
+            getApplicationContext().startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
 
         }/* else if (id == R.id.nav_tools) {
 

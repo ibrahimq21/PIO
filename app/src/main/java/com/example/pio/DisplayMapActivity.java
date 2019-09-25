@@ -22,8 +22,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.navigation.NavigationView;
 
 public class DisplayMapActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
@@ -192,18 +194,31 @@ public class DisplayMapActivity extends AppCompatActivity implements OnMapReadyC
 
         if (id == R.id.nav_home) {
 
-            getApplicationContext().startActivity(new Intent(this, MainPageActivity.class));
+            getApplicationContext().startActivity(new Intent(this, MainPageActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
 
 
         } else if (id == R.id.nav_display_map) {
-            getApplicationContext().startActivity(new Intent(this, DisplayMapActivity.class));
+            getApplicationContext().startActivity(new Intent(this, DisplayMapActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
 
         } else if (id == R.id.nav_display_route) {
-            getApplicationContext().startActivity(new Intent(this, MainActivity.class));
+            getApplicationContext().startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
 
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void makeMarker(int color, String title, LatLng latLng) {
+
+        this.googleMap.addMarker(new MarkerOptions()
+                .icon((BitmapDescriptorFactory
+                        .fromResource(color)))
+                .title(title)
+                .position(latLng));
+
     }
 }
