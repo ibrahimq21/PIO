@@ -14,8 +14,9 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:srcCompat="@drawable/images" />
+        android:contentDescription="@string/app_name"
+        app:srcCompat="@drawable/header_image_1" />
 </LinearLayout>

@@ -9,6 +9,18 @@ public abstract class CheckPostData {
     protected static Double CHECK_POST_START_LNG =68.258274;
 
     protected static LatLng CHECK_POST_START = new LatLng(25.415617,68.258274);
+    protected static LatLng MAIN_GATE = new LatLng(25.408053, 68.265921);
+    protected static LatLng FOREIGN_FACULTY_HOTEL = new LatLng(25.407374, 68.264059);
+    protected static LatLng MOSQ_MUET = new LatLng(25.406282, 68.264663);
+    protected static LatLng DEPT_SW = new LatLng(25.404605, 68.261487);
+    protected static LatLng ADMIN_BLOCK_MUET = new LatLng(25.401615, 68.259773);
+    protected static LatLng HBL_ATM = new LatLng(25.401702, 68.259253);
+    protected static LatLng MUISTD = new LatLng(25.398582, 68.264003);
+    protected static LatLng DEPT_ENGR_TELE = new LatLng(25.407316, 68.26326);
+    protected static LatLng MUET_LIB_INFO = new LatLng(25.407878, 68.261653);
+    protected static LatLng MUET_STC = new LatLng(25.410291, 68.258191);
+    protected static LatLng MUET_TCR = new LatLng(25.413402, 68.258979);
+    protected static LatLng MUET_CRICKET_GROUND = new LatLng(25.416251, 68.257413);
 
     protected static LatLng CHECK_POST_FACULTY_ROAD = new LatLng(25.401672,68.257442);
     protected static LatLng CHECK_POST_FACULTY_ROAD_1 = new LatLng(25.401699,68.257332);

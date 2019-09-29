@@ -216,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
 
         hideSoftKeyboard();
+        mListSuggestionInt.add(driverid);
 
 
     }
@@ -237,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                     int size = mListSuggestionInt.size();
 
-//                    mCursor.close();
+                    mCursor.close();
 
                     for(int i=0; i < size; i++){
                         mTempData[0] = i;
@@ -286,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
 
                         driverid = pointProfileData.get(i).getVehicle_id();
+
 
                         current_lat = pointProfileData.get(i).getCurrent_lat();
                         current_lng = pointProfileData.get(i).getCurrent_lng();
@@ -525,6 +527,7 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
 
                 Log.d(MainActivity.class.getSimpleName(), "onSuggestionSelect : position:" + position);
 
+                searchBar.setQuery(Integer.toString(mListSuggestionInt.get(position)), false);
 
                 return false;
             }
@@ -533,10 +536,10 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             public boolean onSuggestionClick(int position) {
 
                 if (mListSuggestionInt != null && mListSuggestionInt.size() > 0) {
+
                     searchBar.setQuery(Integer.toString(mListSuggestionInt.get(position)), false);
-                    if(mListSuggestionInt.get(position).equals(driverid)){
-                        addMarkerAndRoute();
-                    }
+                    addMarkerAndRoute();
+
                 }
                 return false;
 
@@ -649,9 +652,9 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
             // for Activity#requestPermissions for more details.
             return;
         }
+        mMap.setMyLocationEnabled(true);
         moveCamera(new LatLng(25.4050, 68.2608), 16.5f, "Default Location");
         mMap.setOnMarkerClickListener(this);
-        mMap.setMyLocationEnabled(true);
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
 
@@ -665,6 +668,15 @@ public class MainActivity extends AppCompatActivity implements GeoTask.Geo,
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.minibus_xhdpi_40px)));
 
         busLocation.setFlat(true);
+        makeMarker(R.drawable.marker_lightblue_35px, "Administration Block MUET", CheckPostData.ADMIN_BLOCK_MUET);
+        makeMarker(R.drawable.marker_black_35px, "MUET STC", CheckPostData.MUET_STC);
+        makeMarker(R.drawable.marker_green_35px, "HBL ATM", CheckPostData.HBL_ATM);
+        makeMarker(R.drawable.marker_noisegreen_35px, "MUET Cricket Ground", CheckPostData.MUET_CRICKET_GROUND);
+        makeMarker(R.drawable.marker_orange_35px, "MUET Telecommunication Dept", CheckPostData.DEPT_ENGR_TELE);
+        makeMarker(R.drawable.marker_silver_35px, "MUET Library Info", CheckPostData.MUET_LIB_INFO);
+        makeMarker(R.drawable.marker_notorange_35px, "Mosque", CheckPostData.MOSQ_MUET);
+        makeMarker(R.drawable.marker_notred_35px, "MUET Software Engineering Dept", CheckPostData.DEPT_SW);
+        makeMarker(R.drawable.marker_pink_35px, "MUET Main Gate", CheckPostData.MAIN_GATE);
 
 
     }

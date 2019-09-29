@@ -143,6 +143,16 @@ public class DisplayMapActivity extends AppCompatActivity implements OnMapReadyC
             Log.d(DisplayMapActivity.class.getSimpleName(), "Resources.NotFoundException : " + e.getMessage());
         }
 
+        makeMarker(R.drawable.marker_lightblue_35px, "Administration Block MUET", CheckPostData.ADMIN_BLOCK_MUET);
+        makeMarker(R.drawable.marker_black_35px, "MUET STC", CheckPostData.MUET_STC);
+        makeMarker(R.drawable.marker_green_35px, "HBL ATM", CheckPostData.HBL_ATM);
+        makeMarker(R.drawable.marker_noisegreen_35px, "MUET Cricket Ground", CheckPostData.MUET_CRICKET_GROUND);
+        makeMarker(R.drawable.marker_orange_35px, "MUET Telecommunication Dept", CheckPostData.DEPT_ENGR_TELE);
+        makeMarker(R.drawable.marker_silver_35px, "MUET Library Info", CheckPostData.MUET_LIB_INFO);
+        makeMarker(R.drawable.marker_notorange_35px, "Mosque", CheckPostData.MOSQ_MUET);
+        makeMarker(R.drawable.marker_notred_35px, "MUET Software Engineering Dept", CheckPostData.DEPT_SW);
+        makeMarker(R.drawable.marker_pink_35px, "MUET Main Gate", CheckPostData.MAIN_GATE);
+
 
 
 
